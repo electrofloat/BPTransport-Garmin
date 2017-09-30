@@ -1,0 +1,8 @@
+<strings>
+    <string id="AppName">BPTransport</string>
+
+    <string id="prompt">Acquiring GPS location</string>
+    <string id="PROP_RADIUS_STRING">Radius (in meters) in which to search for stops around your location</string>
+    <string id="PROP_RADIUS_ERROR">Radius must be between 0 and 600 meters</string>
+
+</strings>
