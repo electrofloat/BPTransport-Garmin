@@ -53,7 +53,7 @@ class NearbyStopsDataProvider
     $.DEBUGGER.println(url);
 
     var options = {                                             // set the options
-           :method => Communications.HTTP_REQUEST_METHOD_GET      // set HTTP method
+           :method => Comm.HTTP_REQUEST_METHOD_GET      // set HTTP method
        };
     Comm.makeWebRequest(url,
     null,
@@ -196,6 +196,15 @@ class NearbyStopsDataProvider
 
     callback.invoke(response_code);
     callback = null;
+  }
+
+  public function populate_array_from_online_data(data)
+  {
+    for (var i = 0; i < data.size(); i++)
+      {
+        var dict = data[i];
+        fill_nearby_stops_array(dict["stop_color_type"], dict["stop_id"], dict["stop_name"], dict["direction_name"], dict["line_numbers"], dict["distance"]);
+      }
   }
 
   private function fill_nearby_stops_array(color_text, stop_id, stop, direction, lines, distance)

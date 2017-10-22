@@ -18,17 +18,22 @@
 
 using Toybox.Application as App;
 using Toybox.WatchUi as Ui;
+using Toybox.Communications as Comm;
 
 var debug = false;
 
 var WRITER = new WrapText();
 var DEBUGGER = new Debugger(debug);
+var COMM = new Communications();
+var HAS_PHONE_APP = false;
+var WAIT_FOR_DATA = true;
 
 class BPTransportApp extends App.AppBase {
 
   function initialize()
   {
     AppBase.initialize();
+    $.COMM.initializer();
   }
 
     // onStart() is called on application start up

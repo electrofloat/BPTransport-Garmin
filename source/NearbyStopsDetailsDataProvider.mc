@@ -44,7 +44,7 @@ class NearbyStopsDetailsDataProvider
 
     $.DEBUGGER.println(url);
     var options = {                                             // set the options
-           :method => Communications.HTTP_REQUEST_METHOD_GET      // set HTTP method
+           :method => Comm.HTTP_REQUEST_METHOD_GET      // set HTTP method
       };
 
     Comm.makeWebRequest(url,

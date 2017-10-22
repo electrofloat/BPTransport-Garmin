@@ -79,4 +79,10 @@ class LocationProvider
     Position.enableLocationEvents(Position.LOCATION_DISABLE, method(:on_position));
     callback = null;
   }
+
+  public function is_started()
+  {
+    //$.DEBUGGER.println(Lang.format("is started: $1$", [callback != null]));
+    return callback != null;
+  }
 }

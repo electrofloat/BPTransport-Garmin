@@ -39,6 +39,7 @@ class NearbyStopsView extends Ui.View
   private var out_of_zone = false;
   private var error_response_code = null;
   private var download_done = false;
+  private var nearby_stops_sent = false;
 
   public function initialize()
   {
@@ -95,8 +96,31 @@ class NearbyStopsView extends Ui.View
     Ui.requestUpdate();
   }
 
+  public function on_get_nearby_stops(data)
+  {
+    nearby_stops_data_provider.populate_array_from_online_data(data);
+    on_data(200);
+  }
+
   public function onUpdate(dc)
   {
+    //$.DEBUGGER.println(Lang.format("WAIT FOR DATA: $1$, HAS_PHONE_APP: $2$", [$.WAIT_FOR_DATA, $.HAS_PHONE_APP]));
+    if ($.WAIT_FOR_DATA)
+      {
+        return;
+      }
+    if (!$.HAS_PHONE_APP && !location_provider.is_started())
+      {
+        location_provider.start(method(:on_position));
+      }
+    else if ($.HAS_PHONE_APP && !nearby_stops_sent)
+      {
+        gps_done = true;
+        progress_lines.stop();
+        $.COMM.send_get_nearby_stops(method(:on_get_nearby_stops));
+        nearby_stops_sent = true;
+      }
+
     dc.setPenWidth(1);
 
     if (handle_errors(dc))
@@ -201,7 +225,11 @@ class NearbyStopsView extends Ui.View
 
   public function onShow()
   {
-    location_provider.start(method(:on_position));
+    nearby_stops_sent = false;
+    if (!$.WAIT_FOR_DATA && !$.HAS_PHONE_APP && !location_provider.is_started())
+      {
+        location_provider.start(method(:on_position));
+      }
   }
 
   public function onHide()
@@ -238,6 +266,10 @@ class NearbyStopsView extends Ui.View
 
   public function select()
   {
+    if (nearby_stops_sent)
+      {
+        $.COMM.send_get_nearby_stops_details();
+      }
     var nearby_stops_details_view = new NearbyStopsDetailsView(nearby_stops_data_provider.nearby_stops_array[current_item].get(NearbyStopsDataProvider.STOP_ID),
                                                              nearby_stops_data_provider.nearby_stops_array[current_item].get(NearbyStopsDataProvider.COLOR));
 
@@ -249,6 +281,11 @@ class NearbyStopsView extends Ui.View
   public function back()
   {
     //System.exit();
+    if (nearby_stops_sent)
+      {
+        $.COMM.send_get_nearby_stops_details();
+      }
+
     return false;
   }
 

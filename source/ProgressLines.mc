@@ -65,6 +65,10 @@ class ProgressLines
 
   public function stop()
   {
+    if (mytimer == null)
+      {
+        return;
+      }
     mytimer.stop();
   }
 
