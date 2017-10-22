@@ -1,3 +1,8 @@
 <drawables>
     <bitmap id="LauncherIcon" filename="launcher_icon.png" />
+    <bitmap id="tram" filename="tram.png" />
+    <bitmap id="bus" filename="bus.png" />
+    <bitmap id="trolley" filename="trolley.png" />
+    <bitmap id="nightbus" filename="nightbus.png" />
+    <bitmap id="metro" filename="metro.png" />
 </drawables>

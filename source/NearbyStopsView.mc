@@ -142,7 +142,12 @@ class NearbyStopsView extends Ui.View
         var item = nearby_stops_data_provider.nearby_stops_array[current_item + i - 1];
 
         dc.setColor(text_color, Gfx.COLOR_TRANSPARENT);
-        dc.drawText(x, local_y , FONT, item.get(NearbyStopsDataProvider.STOP), Gfx.TEXT_JUSTIFY_LEFT);
+        if (item.get(NearbyStopsDataProvider.RESOURCE) != null)
+          {
+            var image = Ui.loadResource(item.get(NearbyStopsDataProvider.RESOURCE));
+            dc.drawBitmap(x - 1, local_y - 5, image);
+          }
+        dc.drawText(x + 35, local_y - 2, FONT, item.get(NearbyStopsDataProvider.STOP), Gfx.TEXT_JUSTIFY_LEFT);
         dc.drawText(x, local_y + fontheight , FONT, item.get(NearbyStopsDataProvider.DIRECTION), Gfx.TEXT_JUSTIFY_LEFT);
         var lines_color = item.get(NearbyStopsDataProvider.COLOR);
         if (lines_color == Gfx.COLOR_BLACK)

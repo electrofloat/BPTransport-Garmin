@@ -34,7 +34,8 @@ class NearbyStopsDataProvider
     DIRECTION,
     LINES,
     DISTANCE,
-    COLOR
+    COLOR,
+    RESOURCE
   }
 
   public function initialize()
@@ -174,15 +175,8 @@ class NearbyStopsDataProvider
               {
                 continue;
               }
-            var color = get_color(color_text);
-            nearby_stops_array.add({
-              STOP_ID => stop_id,
-                  STOP => stop,
-                  DIRECTION => direction,
-                  LINES => lines,
-                  DISTANCE => distance,
-                  COLOR => color
-                });
+            fill_nearby_stops_array(color_text, stop_id, stop, direction, lines, distance);
+
             if (nearby_stops_array.size() == 10)
               {
                 break;
@@ -204,26 +198,44 @@ class NearbyStopsDataProvider
     callback = null;
   }
 
+  private function fill_nearby_stops_array(color_text, stop_id, stop, direction, lines, distance)
+  {
+    var color = get_color(color_text);
+    nearby_stops_array.add({
+              STOP_ID => stop_id,
+              STOP => stop,
+              DIRECTION => direction,
+              LINES => lines,
+              DISTANCE => distance,
+              COLOR => color[0],
+              RESOURCE => color[1]
+            });
+  }
+
   private function get_color(color_text)
   {
     if (color_text.equals("TRAM"))
       {
-        return Gfx.COLOR_YELLOW;
+        return [Gfx.COLOR_YELLOW, Rez.Drawables.tram];
       }
     else if (color_text.equals("BUS"))
       {
-        return Gfx.COLOR_BLUE;
+        return [Gfx.COLOR_BLUE, Rez.Drawables.bus];
       }
     else if (color_text.equals("NIGHTBUS"))
       {
-        return Gfx.COLOR_DK_BLUE;
+        return [Gfx.COLOR_DK_BLUE, Rez.Drawables.nightbus];
       }
     else if (color_text.equals("TROLLEYBUS"))
       {
-        return Gfx.COLOR_RED;
+        return [Gfx.COLOR_RED, Rez.Drawables.trolley];
+      }
+    else if (color_text.equals("M1") || color_text.equals("M2") || color_text.equals("M3") || color_text.equals("M4"))
+      {
+        return [Gfx.COLOR_BLACK, Rez.Drawables.metro];
       }
 
-    return Gfx.COLOR_BLACK;
+    return [Gfx.COLOR_BLACK, null];
   }
 
   private function sort_array()
