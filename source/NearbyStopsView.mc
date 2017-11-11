@@ -105,20 +105,20 @@ class NearbyStopsView extends Ui.View
   public function onUpdate(dc)
   {
     //$.DEBUGGER.println(Lang.format("WAIT FOR DATA: $1$, HAS_PHONE_APP: $2$", [$.WAIT_FOR_DATA, $.HAS_PHONE_APP]));
-    if ($.WAIT_FOR_DATA)
+    if (!$.WAIT_FOR_DATA)
       {
-        return;
-      }
-    if (!$.HAS_PHONE_APP && !location_provider.is_started())
-      {
-        location_provider.start(method(:on_position));
-      }
-    else if ($.HAS_PHONE_APP && !nearby_stops_sent)
-      {
-        gps_done = true;
-        progress_lines.stop();
-        $.COMM.send_get_nearby_stops(method(:on_get_nearby_stops));
-        nearby_stops_sent = true;
+        if (!$.HAS_PHONE_APP && !location_provider.is_started())
+          {
+            //progress_lines.stop();
+            location_provider.start(method(:on_position));
+          }
+        else if ($.HAS_PHONE_APP && !nearby_stops_sent)
+          {
+            gps_done = true;
+            progress_lines.stop();
+            $.COMM.send_get_nearby_stops(method(:on_get_nearby_stops));
+            nearby_stops_sent = true;
+          }        
       }
 
     dc.setPenWidth(1);
@@ -192,7 +192,15 @@ class NearbyStopsView extends Ui.View
     dc.setColor( Gfx.COLOR_WHITE, Gfx.COLOR_BLACK );
     dc.clear();
 
-    if (out_of_zone)
+    if ($.WAIT_FOR_DATA)
+      {
+        progress_lines.draw(dc, Gfx.COLOR_BLUE, Gfx.COLOR_BLACK, 8);
+
+        dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
+        $.WRITER.writeLines(dc, "Checking for companion app...", Gfx.FONT_SYSTEM_TINY, dc.getHeight() / 2 - Gfx.getFontHeight(Gfx.FONT_SYSTEM_TINY));
+        return true;
+      }
+    else if (out_of_zone)
       {
         error_draw.draw(dc, "Out of service zone. Maybe try travelling to Budapest first :)", 50);
         location_provider.stop();

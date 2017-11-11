@@ -19,34 +19,13 @@
 using Toybox.Communications as Comm;
 using Toybox.WatchUi as Ui;
 
-class CommCheckListener extends Comm.ConnectionListener
+class CommListener extends Comm.ConnectionListener
 {
-  function initialize()
+  private var callback;
+  function initialize(cb)
   {
-    Comm.ConnectionListener.initialize();
-  }
+    callback = cb;
 
-  public function onComplete()
-  {
-    $.DEBUGGER.println("Transmit complete");
-    $.HAS_PHONE_APP = true;
-    $.WAIT_FOR_DATA = false;
-    Ui.requestUpdate();
-  }
-
-  public function onError()
-  {
-    $.DEBUGGER.println("Transmit error");
-    $.HAS_PHONE_APP = false;
-    $.WAIT_FOR_DATA = false;
-    Ui.requestUpdate();
-  }
-}
-
-class NearbyStopsListener extends Comm.ConnectionListener
-{
-  function initialize()
-  {
     Comm.ConnectionListener.initialize();
   }
 
@@ -54,41 +33,35 @@ class NearbyStopsListener extends Comm.ConnectionListener
   {
     $.DEBUGGER.println("Transmit complete");
 
-    Ui.requestUpdate();
+    $.data_in_progress = null;
+    $.MESSAGE_QUEUE = $.MESSAGE_QUEUE.slice(1, $.MESSAGE_QUEUE.size());
+    $.COMM_RETRY = 0;
+    $.DEBUGGER.println(Lang.format("Message queue size AFTER COMPLETE: $1$", [$.MESSAGE_QUEUE.size()]));
+    if ($.MESSAGE_QUEUE.size() > 0)
+      {
+        $.COMM_TIMER.start(callback, 50, false);
+      }
+
+    callback = null;
   }
 
   public function onError()
   {
     $.DEBUGGER.println("Transmit error");
 
-    Ui.requestUpdate();
+    var backoff = 200 + ($.COMM_RETRY * 100);
+    $.COMM_TIMER.start(callback, backoff, false);
+    callback = null;
   }
 }
 
-class NearbyStopsDetailsListener extends Comm.ConnectionListener
-{
-  function initialize()
-  {
-    Comm.ConnectionListener.initialize();
-  }
-
-  public function onComplete()
-  {
-    $.DEBUGGER.println("Transmit complete");
-
-    Ui.requestUpdate();
-  }
-
-  public function onError()
-  {
-    $.DEBUGGER.println("Transmit error");
-
-    Ui.requestUpdate();
-  }
-}
 class Communications
 {
   public var comm_check_listener;
+  public var comm_in_progress = false;
+    
+  private const MAX_RETRIES = 2;
+  
   enum
   {
     MESSAGE_TYPE_GET_LANGUAGE                   = 0,
@@ -103,34 +76,85 @@ class Communications
   private var callback = null;
   public function initialize()
   {
-
   }
 
+  public function enqueue(data)
+  {
+    $.DEBUGGER.println(Lang.format("Enqueue data: $1$", [data]));
+    $.MESSAGE_QUEUE.add(data);
+    $.DEBUGGER.println(Lang.format("Enqueue MQ size: $1$", [$.MESSAGE_QUEUE.size()]));
+    if ($.data_in_progress == null)
+      {
+        send_next_message();
+      }
+  }
+  
+  public function send_next_message()
+  {
+    $.DEBUGGER.println("send_next_message");
+    if ($.data_in_progress != null)
+      {
+        $.COMM_RETRY += 1;
+        if ($.COMM_RETRY > MAX_RETRIES)
+          {
+            //$.MESSAGE_QUEUE.remove(0);
+            $.MESSAGE_QUEUE = $.MESSAGE_QUEUE.slice(1, $.MESSAGE_QUEUE.size());
+            $.data_in_progress = null;
+            if ($.WAIT_FOR_DATA)
+              {
+                $.HAS_PHONE_APP = false;
+                $.WAIT_FOR_DATA = false;
+                Ui.requestUpdate();
+                return;
+              }
+          }
+      }
+      
+    if ($.MESSAGE_QUEUE.size() == 0)
+      {
+        return;
+      }
+    $.DEBUGGER.println(Lang.format("Message queue size: $1$", [$.MESSAGE_QUEUE.size()]));
+    if ($.data_in_progress == null)
+      {
+        $.data_in_progress = $.MESSAGE_QUEUE[0];
+      }
+      
+    $.DEBUGGER.println(Lang.format("Sending: $1$", [$.data_in_progress]));
+    Comm.transmit($.data_in_progress, null, new CommListener(method(:send_next_message)));
+  }
+  
   public function initializer()
   {
     Comm.registerForPhoneAppMessages(method(:on_received));
-
-    Comm.transmit(MESSAGE_TYPE_GET_LANGUAGE, null, new CommCheckListener());
-
+    enqueue(MESSAGE_TYPE_GET_LANGUAGE);
   }
 
   public function send_get_nearby_stops(param_callback)
   {
-    callback = param_callback;
-    Comm.transmit(MESSAGE_TYPE_GET_NEARBY_STOPS, null, new NearbyStopsListener());
     $.DEBUGGER.println("send get nearby_stops");
+    callback = param_callback;
+    enqueue(MESSAGE_TYPE_GET_NEARBY_STOPS);
   }
 
   public function send_get_nearby_stops_details()
   {
-    callback = null;
-    Comm.transmit(MESSAGE_TYPE_GET_NEARBY_STOPS_DETAILS, null, new NearbyStopsDetailsListener());
+    //callback = null;
+    enqueue(MESSAGE_TYPE_GET_NEARBY_STOPS_DETAILS);
     $.DEBUGGER.println("send get nearby_stops details");
   }
 
   private function on_received(msg)
   {
     $.DEBUGGER.println(Lang.format("data: $1$", [msg.data.toString()]));
-    callback.invoke(msg.data);
+    if (msg.data[0] == MESSAGE_TYPE_GET_LANGUAGE_REPLY)
+      {
+        $.WAIT_FOR_DATA = false;
+        $.HAS_PHONE_APP = true;
+        Ui.requestUpdate();
+        return;
+      }
+    var new_data = msg.data.slice(1, msg.data.size());
+    callback.invoke(new_data);
   }
 }

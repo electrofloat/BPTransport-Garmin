@@ -200,6 +200,7 @@ class NearbyStopsDataProvider
 
   public function populate_array_from_online_data(data)
   {
+    nearby_stops_array = [];
     for (var i = 0; i < data.size(); i++)
       {
         var dict = data[i];

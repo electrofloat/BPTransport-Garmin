@@ -60,6 +60,7 @@ class ProgressLines
       {
         mytimer = new Timer.Timer();
         mytimer.start(method(:timer_callback), 50, true);
+        $.DEBUGGER.println("Progress timer started");
       }
   }
 
@@ -70,6 +71,8 @@ class ProgressLines
         return;
       }
     mytimer.stop();
+    mytimer = null;
+    $.DEBUGGER.println("Progress timer stopped");
   }
 
   public function timer_callback()

@@ -27,12 +27,19 @@ var DEBUGGER = new Debugger(debug);
 var COMM = new Communications();
 var HAS_PHONE_APP = false;
 var WAIT_FOR_DATA = true;
+var MESSAGE_QUEUE = [];
+var data_in_progress;
+var COMM_TIMER;
+var COMM_RETRY;
 
 class BPTransportApp extends App.AppBase {
 
   function initialize()
   {
     AppBase.initialize();
+    $.data_in_progress = null;
+    $.COMM_TIMER = new Timer.Timer();
+    $.COMM_RETRY = 0;
     $.COMM.initializer();
   }
 
