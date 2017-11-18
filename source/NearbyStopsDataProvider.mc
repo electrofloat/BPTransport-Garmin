@@ -67,8 +67,10 @@ class NearbyStopsDataProvider
     $.DEBUGGER.println(data);
     if (response_code != 200)
       {
-        callback.invoke(response_code);
-        callback = null;
+        if (callback != null)
+          {
+            callback.invoke(response_code);
+          }
         return;
       }
     try
@@ -187,17 +189,25 @@ class NearbyStopsDataProvider
       }
     catch (ex instanceof JsonParseException)
       {
-        callback.invoke(-9999);
-        callback = null;
+        if (callback != null)
+          {
+            callback.invoke(-9999);
+          }
         return;
       }
 
     sort_array();
-
-    callback.invoke(response_code);
-    callback = null;
+    if (callback != null)
+      {
+        callback.invoke(response_code);
+      }
   }
 
+  public function clear_callback()
+  {
+    callback = null;
+  }
+  
   public function populate_array_from_online_data(data)
   {
     nearby_stops_array = [];

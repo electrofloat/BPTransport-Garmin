@@ -36,18 +36,37 @@ class NearbyStopsDetailsView extends Ui.View
   private var linenum_color;
   private var nearby_stops_details_data_provider;
 
-  public function initialize(stop_id, color)
+  public function initialize(stop_id, color, current_item)
   {
-    $.DEBUGGER.println("initialize");
+    $.DEBUGGER.println(Lang.format("initialize, download_done: $1$", [download_done]));
     progress_lines = new ProgressLines();
     error_draw = new ErrorDraw();
     linenum_color = color;
     nearby_stops_details_data_provider = new NearbyStopsDetailsDataProvider();
-    nearby_stops_details_data_provider.get_data(stop_id, method(:on_data));
+    if ($.HAS_PHONE_APP)
+      {
+        $.COMM.send_get_nearby_stops_details(current_item, method(:on_get_nearby_stops_details));
+      }
+    else
+      {
+        nearby_stops_details_data_provider.get_data(stop_id, method(:on_data));
+      }
 
     View.initialize();
   }
 
+  public function on_get_nearby_stops_details(data)
+  {
+    if (data.size() == 0 ||
+        data[0] != MESSAGE_TYPE_GET_NEARBY_STOPS_DETAILS_REPLY)
+      {
+        return;
+      }
+    data = data.slice(1, data.size());
+    nearby_stops_details_data_provider.populate_array_from_online_data(data);
+    on_data(200);
+  }
+  
   private function on_data(response_code)
   {
     if (response_code != 200)
@@ -131,6 +150,7 @@ class NearbyStopsDetailsView extends Ui.View
          dc.drawText((dc.getWidth() - width_at_pos) / 2, local_y , FONT, item.get(NearbyStopsDetailsDataProvider.LINE_NUMBER), Gfx.TEXT_JUSTIFY_LEFT);
          dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
          var start_time = item.get(NearbyStopsDetailsDataProvider.START_TIME);
+         //$.DEBUGGER.println(Lang.format("STARTTIME: $1$, download_done: $2$", [start_time, download_done]));
          var predicted_start_time = item.get(NearbyStopsDetailsDataProvider.PREDICTED_START_TIME);
          var time_moment = new Time.Moment(start_time.toNumber());
          var time = Gregorian.info(time_moment, Time.FORMAT_SHORT);
@@ -140,8 +160,12 @@ class NearbyStopsDetailsView extends Ui.View
              center_time_x = center_time_x - 20;
            }
          dc.drawText(center_time_x, local_y, FONT, Lang.format("$1$:$2$", [time.hour.format("%02d"), time.min.format("%02d")]), Gfx.TEXT_JUSTIFY_CENTER);
-         time = get_pred_time(predicted_start_time);
 
+         if (predicted_start_time == 0)
+           {
+             predicted_start_time = start_time;
+           }
+         time = get_pred_time(predicted_start_time);
          width_at_pos = $.WRITER.getWidthForLine(local_y + fontheight, fontheight);
          dc.drawText((dc.getWidth() - width_at_pos) / 2, local_y + fontheight, FONT, item.get(NearbyStopsDetailsDataProvider.DIRECTION), Gfx.TEXT_JUSTIFY_LEFT);
          dc.drawLine(0, local_y + 2 * fontheight, dc.getWidth(), local_y + 2 * fontheight);
@@ -174,7 +198,12 @@ class NearbyStopsDetailsView extends Ui.View
 
     var seconds = now.compare(pred_start);
 
-    var string = "";
+    return format_seconds(seconds);
+  }
+  
+  private function format_seconds(seconds)
+  {
+     var string = "";
 
     if (seconds < 0)
       {
@@ -202,6 +231,7 @@ class NearbyStopsDetailsView extends Ui.View
   {
     update_timer.stop();
     progress_lines.stop();
+    nearby_stops_details_data_provider.clear_callback();
   }
 
   public function next()

@@ -59,8 +59,10 @@ class NearbyStopsDetailsDataProvider
     $.DEBUGGER.println(data);
     if (response_code != 200)
       {
-        callback.invoke(response_code);
-        callback = null;
+        if (callback != null)
+          {
+            callback.invoke(response_code);
+          }
         return;
       }
 
@@ -143,13 +145,8 @@ class NearbyStopsDetailsDataProvider
               }
 
             line_number = route.get("shortName");
-
-            nearby_stops_details_array.add({
-              START_TIME => start_time,
-                  PREDICTED_START_TIME => predicted_start_time,
-                  DIRECTION => direction,
-                  LINE_NUMBER => line_number
-                });
+            
+            fill_nearby_stops_details_array(start_time, predicted_start_time, direction, line_number);
 
             if (nearby_stops_details_array.size() == 10)
               {
@@ -159,13 +156,42 @@ class NearbyStopsDetailsDataProvider
       }
     catch (ex instanceof JsonParseException)
       {
-        callback.invoke(-9999);
-        callback = null;
+        if (callback != null)
+          {
+            callback.invoke(-9999);
+          }
         return;
       }
 
-    callback.invoke(response_code);
-    callback = null;
+    if (callback != null)
+      {
+        callback.invoke(response_code);
+      }
   }
 
+  public function clear_callback()
+  {
+    callback = null;
+  }
+  
+  public function populate_array_from_online_data(data)
+  {
+    $.DEBUGGER.println("populate array from online data: data");
+    nearby_stops_details_array = [];
+    for (var i = 0; i < data.size(); i++)
+      {
+        var dict = data[i];
+        fill_nearby_stops_details_array(dict["start_time"], dict["pred_start"], dict["direction"], dict["line_num"]);
+      }
+  }
+  
+  public function fill_nearby_stops_details_array(start_time, pred_start, direction, line_num)
+  {
+    nearby_stops_details_array.add({
+             START_TIME => start_time,
+             PREDICTED_START_TIME => pred_start,
+             DIRECTION => direction,
+             LINE_NUMBER => line_num
+    });
+  }
 }

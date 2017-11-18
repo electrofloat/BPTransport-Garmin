@@ -24,13 +24,11 @@ var debug = false;
 
 var WRITER = new WrapText();
 var DEBUGGER = new Debugger(debug);
-var COMM = new Communications();
+var COMM;
 var HAS_PHONE_APP = false;
 var WAIT_FOR_DATA = true;
-var MESSAGE_QUEUE = [];
 var data_in_progress;
-var COMM_TIMER;
-var COMM_RETRY;
+var wait_for_answer;
 
 class BPTransportApp extends App.AppBase {
 
@@ -38,9 +36,9 @@ class BPTransportApp extends App.AppBase {
   {
     AppBase.initialize();
     $.data_in_progress = null;
-    $.COMM_TIMER = new Timer.Timer();
-    $.COMM_RETRY = 0;
-    $.COMM.initializer();
+    $.wait_for_answer = false;
+    $.COMM = new Communications();
+    //$.COMM.initializer();
   }
 
     // onStart() is called on application start up
@@ -50,7 +48,7 @@ class BPTransportApp extends App.AppBase {
 
     // onStop() is called when your application is exiting
   function onStop(state)
-  {
+  {  
   }
 
     // Return the initial view of your application here

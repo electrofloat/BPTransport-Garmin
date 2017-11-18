@@ -62,7 +62,7 @@ class NearbyStopsView extends Ui.View
 
     if ($.debug)
       {
-        /*====== TEST_DATA ====== */
+        //====== TEST_DATA ====== 
         location[0] = NearbyStopsDataProvider.LAT;
         location[1] = NearbyStopsDataProvider.LON;
       }
@@ -98,10 +98,21 @@ class NearbyStopsView extends Ui.View
 
   public function on_get_nearby_stops(data)
   {
+    if (data.size() == 0 ||
+        data[0] != MESSAGE_TYPE_GET_NEARBY_STOPS_REPLY)
+      {
+        return;
+      }
+    data = data.slice(1, data.size());
     nearby_stops_data_provider.populate_array_from_online_data(data);
     on_data(200);
   }
 
+  function get_language_reply()
+  {
+    $.DEBUGGER.println("******get_language_reply invoked");
+  }
+  
   public function onUpdate(dc)
   {
     //$.DEBUGGER.println(Lang.format("WAIT FOR DATA: $1$, HAS_PHONE_APP: $2$", [$.WAIT_FOR_DATA, $.HAS_PHONE_APP]));
@@ -145,7 +156,7 @@ class NearbyStopsView extends Ui.View
             dc.fillRectangle(0, 0, dc.getWidth(), element_height);
             continue;
           }
-        if (i == 2 && current_item == nearby_stops_data_provider.nearby_stops_array.size() - 1)
+        if (current_item + i - 1 > nearby_stops_data_provider.nearby_stops_array.size() - 1)
           {
             dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
             dc.fillRectangle(0, local_y - element_height + 3 * fontheight + 10, dc.getWidth(), dc.getHeight());
@@ -204,12 +215,14 @@ class NearbyStopsView extends Ui.View
       {
         error_draw.draw(dc, "Out of service zone. Maybe try travelling to Budapest first :)", 50);
         location_provider.stop();
+        progress_lines.stop();
         return true;
       }
     else if (error_response_code != null)
       {
         error_draw.draw(dc, Lang.format("Error downloading data; $1$", [Utils.get_text_for_error_code(error_response_code)]), 50);
         location_provider.stop();
+        progress_lines.stop();
         return true;
       }
     else if (!gps_done)
@@ -228,6 +241,13 @@ class NearbyStopsView extends Ui.View
         $.WRITER.writeLines(dc, "Downloading RealTime data...", Gfx.FONT_SYSTEM_TINY, dc.getHeight() / 2 - Gfx.getFontHeight(Gfx.FONT_SYSTEM_TINY));
         return true;
       }
+    else if (nearby_stops_data_provider.nearby_stops_array.size() == 0)
+      {
+        error_draw.draw(dc, "There are no nearby stops. Try increasing the search radius.", 50);
+        location_provider.stop();
+        progress_lines.stop();
+        return true;
+      }
     return false;
   }
 
@@ -244,6 +264,7 @@ class NearbyStopsView extends Ui.View
   {
     location_provider.stop();
     progress_lines.stop();
+    nearby_stops_data_provider.clear_callback();
   }
 
   public function next()
@@ -274,13 +295,10 @@ class NearbyStopsView extends Ui.View
 
   public function select()
   {
-    if (nearby_stops_sent)
-      {
-        $.COMM.send_get_nearby_stops_details();
-      }
     var nearby_stops_details_view = new NearbyStopsDetailsView(nearby_stops_data_provider.nearby_stops_array[current_item].get(NearbyStopsDataProvider.STOP_ID),
-                                                             nearby_stops_data_provider.nearby_stops_array[current_item].get(NearbyStopsDataProvider.COLOR));
+                                                             nearby_stops_data_provider.nearby_stops_array[current_item].get(NearbyStopsDataProvider.COLOR), current_item);
 
+    nearby_stops_data_provider.clear_callback();
     Ui.pushView(nearby_stops_details_view, new BPTInputDelegate(nearby_stops_details_view), Ui.SLIDE_LEFT);
 
     return true;
@@ -291,9 +309,13 @@ class NearbyStopsView extends Ui.View
     //System.exit();
     if (nearby_stops_sent)
       {
-        $.COMM.send_get_nearby_stops_details();
+        $.COMM.send_exit();
       }
-
+    if (location_provider.is_started())
+      {
+        location_provider.stop();
+      }
+      
     return false;
   }
 
