@@ -26,7 +26,7 @@ var WRITER = new WrapText();
 var DEBUGGER = new Debugger(debug);
 var COMM;
 var HAS_PHONE_APP = false;
-var WAIT_FOR_DATA = true;
+var WAIT_FOR_DATA = false;
 var data_in_progress;
 var wait_for_answer;
 
