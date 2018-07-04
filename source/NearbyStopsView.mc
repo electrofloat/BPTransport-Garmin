@@ -18,6 +18,7 @@
 
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
+using Toybox.Attention;
 
 class NearbyStopsView extends Ui.View
 {
@@ -90,7 +91,19 @@ class NearbyStopsView extends Ui.View
         return;
       }
 
-    download_done = true;
+    if (!download_done)
+      {
+        if (Attention has :vibrate)
+          {
+             var vibeData =
+              [
+                new Attention.VibeProfile(100, 700), // On for 0.7 second
+              ];
+             Attention.vibrate(vibeData);
+          }
+        download_done = true;
+      }
+    
     progress_lines.stop();
 
     Ui.requestUpdate();
