@@ -46,7 +46,7 @@ class NearbyStopsDataProvider
   public function get_data(location, param_callback)
   {
     callback = param_callback;
-    var radius = Application.getApp().getProperty("PROP_RADIUS");
+    var radius = Application.getApp().getProperty("radius");
     var url = Lang.format(
       "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/stops-for-location.json?lon=$1$&lat=$2$&radius=$3$",
       [location[1].format("%f"), location[0].format("%f"), radius]

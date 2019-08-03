@@ -1,0 +1,3 @@
+<properties>
+  <property id="radius" type="number">50</property>
+</properties>

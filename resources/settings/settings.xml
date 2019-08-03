@@ -1,0 +1,5 @@
+<settings>
+  <setting propertyKey="@Properties.radius" title="@Strings.radius">
+  	<settingConfig type="numeric" min="0" max="600"></settingConfig>
+  </setting>
+</settings>
