@@ -155,7 +155,7 @@ class WrapText {
     Ui.requestUpdate();
   }
 
-  function scrollDown() {
+  public function scrollDown() {
     if (!overflow) {
       return false;
     }

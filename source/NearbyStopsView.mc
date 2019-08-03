@@ -54,7 +54,7 @@ class NearbyStopsView extends Ui.View
     View.initialize();
   }
 
-  private function on_position(info)
+  public function on_position(info)
   {
     location = info.position.toDegrees();
     $.DEBUGGER.println(location);
@@ -82,7 +82,7 @@ class NearbyStopsView extends Ui.View
     nearby_stops_data_provider.get_data(location, method(:on_data));
   }
 
-  private function on_data(response_code)
+  public function on_data(response_code)
   {
     if (response_code != 200)
       {

@@ -77,7 +77,7 @@ class CommListener extends Comm.ConnectionListener
     callback = null;
   }
   
-  private function answer_not_arrived()
+  public function answer_not_arrived()
   {
     if ($.wait_for_answer && $.WAIT_FOR_DATA)
       {
@@ -172,7 +172,7 @@ class Communications
     $.DEBUGGER.println("send exit");
   }
   
-  private function on_received(msg)
+  public function on_received(msg)
   {
     $.DEBUGGER.println(Lang.format("data: $1$", [msg.data.toString()]));
     if (msg.data[0] == MESSAGE_TYPE_GET_LANGUAGE_REPLY)

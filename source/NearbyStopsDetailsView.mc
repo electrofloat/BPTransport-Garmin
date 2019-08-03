@@ -20,6 +20,7 @@ using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
+using Toybox.Timer;
 
 class NearbyStopsDetailsView extends Ui.View
 {
@@ -67,7 +68,7 @@ class NearbyStopsDetailsView extends Ui.View
     on_data(200);
   }
   
-  private function on_data(response_code)
+  public function on_data(response_code)
   {
     if (response_code != 200)
       {
@@ -82,7 +83,7 @@ class NearbyStopsDetailsView extends Ui.View
     update_timer.start(method(:timercallback), 1000, true);
   }
 
-  private function timercallback()
+  public function timercallback()
   {
     Ui.requestUpdate();
   }

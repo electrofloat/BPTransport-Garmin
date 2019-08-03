@@ -18,6 +18,7 @@
 
 using Toybox.Communications as Comm;
 using Toybox.Graphics as Gfx;
+using Toybox.Position;
 
 class NearbyStopsDataProvider
 {
@@ -61,7 +62,7 @@ class NearbyStopsDataProvider
     method(:response_callback));
   }
 
-  private function response_callback(response_code, data)
+  public function response_callback(response_code, data)
   {
     $.DEBUGGER.println(response_code);
     $.DEBUGGER.println(data);

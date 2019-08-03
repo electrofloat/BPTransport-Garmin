@@ -32,7 +32,7 @@ class LocationProvider
   {
   }
 
-  private function on_position(param_info)
+  public function on_position(param_info)
   {
 
     if (param_info.accuracy < Position.QUALITY_USABLE)
@@ -52,7 +52,7 @@ class LocationProvider
     timer.start(method(:timercallback), 5000, true);
   }
 
-  private function timercallback()
+  public function timercallback()
   {
     var distance = Utils.get_simple_distance(info.position, prev_info.position);
     $.DEBUGGER.println(Lang.format("LocationProvider::timercallback; $1$", [distance]));

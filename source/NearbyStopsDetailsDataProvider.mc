@@ -53,7 +53,7 @@ class NearbyStopsDetailsDataProvider
     method(:response_callback));
   }
 
-  private function response_callback(response_code, data)
+  public function response_callback(response_code, data)
   {
     $.DEBUGGER.println(response_code);
     $.DEBUGGER.println(data);
