@@ -308,6 +308,10 @@ class NearbyStopsView extends Ui.View
 
   public function select()
   {
+    if (nearby_stops_data_provider.nearby_stops_array.size() == 0)
+      {
+        return false;
+      }
     var nearby_stops_details_view = new NearbyStopsDetailsView(nearby_stops_data_provider.nearby_stops_array[current_item].get(NearbyStopsDataProvider.STOP_ID),
                                                              nearby_stops_data_provider.nearby_stops_array[current_item].get(NearbyStopsDataProvider.COLOR), current_item);
 
