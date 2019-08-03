@@ -48,7 +48,7 @@ class NearbyStopsDataProvider
     callback = param_callback;
     var radius = Application.getApp().getProperty("PROP_RADIUS");
     var url = Lang.format(
-      "http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/stops-for-location.json?lon=$1$&lat=$2$&radius=$3$",
+      "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/stops-for-location.json?lon=$1$&lat=$2$&radius=$3$",
       [location[1].format("%f"), location[0].format("%f"), radius]
     );
     $.DEBUGGER.println(url);

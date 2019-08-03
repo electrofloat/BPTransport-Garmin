@@ -38,7 +38,7 @@ class NearbyStopsDetailsDataProvider
   {
     callback = _callback;
     var url = Lang.format(
-      "http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/arrivals-and-departures-for-stop.json?includeReferences=routes,trips&stopId=$1$",
+      "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/arrivals-and-departures-for-stop.json?includeReferences=routes,trips&stopId=$1$",
       [stop_id]
     );
 
