@@ -48,6 +48,22 @@ class NearbyStopsDetailsView extends Ui.View
       {
         $.COMM.send_get_nearby_stops_details(current_item, method(:on_get_nearby_stops_details));
       }
+    else if ($.debug && $.FAKE_FUTAR_DATA)
+        {
+          var my_dict = {
+            "start_time" => Time.now().value() + 60,
+            "pred_start" => Time.now().value() + 120,
+            "direction" => "Gazdagréti tér - Újpalota, Nyírpalota utca",
+            "line_num" => "8E"
+          };
+          var data = [MESSAGE_TYPE_GET_NEARBY_STOPS_DETAILS_REPLY];
+          for (var i = 0; i < 5; i++)
+          {
+            data.add(my_dict);
+          }
+
+          on_get_nearby_stops_details(data);
+        }
     else
       {
         nearby_stops_details_data_provider.get_data(stop_id, method(:on_data));

@@ -142,7 +142,27 @@ class NearbyStopsView extends Ui.View
             progress_lines.stop();
             $.COMM.send_get_nearby_stops(method(:on_get_nearby_stops));
             nearby_stops_sent = true;
-          }        
+          }
+        else if ($.debug && $.FAKE_FUTAR_DATA)
+          {
+              var my_dict = {
+                "stop_color_type" => "BUS",
+                "stop_id" => "1",
+                "stop_name" => "Blaha Lujzta tér",
+                "direction_name" => "Újpalota, Nyírpalota út | Kelenföld vasútállomás",
+                "line_numbers" => "8E, 108E, 133E, 907, 907A",
+                "distance" => 38
+              };
+              var data = [MESSAGE_TYPE_GET_NEARBY_STOPS_REPLY];
+              for (var i = 0; i < 5; i++)
+              {
+                data.add(my_dict);
+              }
+              gps_done = true;
+              progress_lines.stop();
+
+              on_get_nearby_stops(data);
+          }
       }
 
     dc.setPenWidth(1);

@@ -21,6 +21,7 @@ using Toybox.WatchUi as Ui;
 using Toybox.Communications as Comm;
 
 var debug = false;
+var FAKE_FUTAR_DATA = false;
 
 var WRITER = new WrapText();
 var DEBUGGER = new Debugger(debug);
