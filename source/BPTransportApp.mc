@@ -38,7 +38,7 @@ class BPTransportApp extends App.AppBase {
     AppBase.initialize();
     $.data_in_progress = null;
     $.wait_for_answer = false;
-    $.COMM = new Communications();
+    //$.COMM = new Communications();
     //$.COMM.initializer();
   }
 
