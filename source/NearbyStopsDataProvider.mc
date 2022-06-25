@@ -19,6 +19,7 @@
 using Toybox.Communications as Comm;
 using Toybox.Graphics as Gfx;
 using Toybox.Position;
+using Toybox.System;
 
 class NearbyStopsDataProvider
 {
@@ -28,6 +29,7 @@ class NearbyStopsDataProvider
 
   private var callback = null;
   public var nearby_stops_array = [];
+  hidden var screen_shape;
 
   enum {
     STOP_ID,
@@ -41,6 +43,8 @@ class NearbyStopsDataProvider
 
   public function initialize()
   {
+    var settings = System.getDeviceSettings();
+    screen_shape = settings.screenShape;
   }
 
   public function get_data(location, param_callback)
@@ -235,21 +239,34 @@ class NearbyStopsDataProvider
 
   private function get_color(color_text)
   {
+    var tram_color = Gfx.COLOR_YELLOW;
+    var bus_color = Gfx.COLOR_BLUE;
+    var nightbus_color = Gfx.COLOR_DK_BLUE;
+    var trolleybus_color = Gfx.COLOR_RED;
+
+    if (Toybox.System has :SCREEN_SHAPE_SEMI_OCTAGON && screen_shape == System.SCREEN_SHAPE_SEMI_OCTAGON)
+      {
+        tram_color = Gfx.COLOR_BLACK;
+        bus_color = Gfx.COLOR_BLACK;
+        nightbus_color = Gfx.COLOR_BLACK;
+        trolleybus_color = Gfx.COLOR_BLACK;
+      }
+
     if (color_text.equals("TRAM"))
       {
-        return [Gfx.COLOR_YELLOW, Rez.Drawables.tram];
+        return [tram_color, Rez.Drawables.tram];
       }
     else if (color_text.equals("BUS"))
       {
-        return [Gfx.COLOR_BLUE, Rez.Drawables.bus];
+        return [bus_color, Rez.Drawables.bus];
       }
     else if (color_text.equals("NIGHTBUS"))
       {
-        return [Gfx.COLOR_DK_BLUE, Rez.Drawables.nightbus];
+        return [nightbus_color, Rez.Drawables.nightbus];
       }
     else if (color_text.equals("TROLLEYBUS"))
       {
-        return [Gfx.COLOR_RED, Rez.Drawables.trolley];
+        return [trolleybus_color, Rez.Drawables.trolley];
       }
     else if (color_text.equals("M1") || color_text.equals("M2") || color_text.equals("M3") || color_text.equals("M4"))
       {

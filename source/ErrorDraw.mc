@@ -42,7 +42,19 @@ class ErrorDraw
 
     dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
     dc.clear();
-    writer.writeLines(dc, text, Gfx.FONT_SYSTEM_TINY, y);
+
+    var text_area = new Ui.TextArea({
+            :text=>text,
+            :color=>Gfx.COLOR_WHITE,
+            :font=>[Gfx.FONT_MEDIUM, Gfx.FONT_SMALL, Gfx.FONT_SYSTEM_TINY, Gfx.FONT_SYSTEM_XTINY],
+            :justification=>Gfx.TEXT_JUSTIFY_CENTER,
+            :locX =>Ui.LAYOUT_HALIGN_CENTER,
+            :locY=>Ui.LAYOUT_VALIGN_CENTER,
+            :width=>dc.getWidth() * 0.87,
+            :height=>dc.getHeight() * 0.37
+        });
+
+    text_area.draw(dc);
     dc.setColor( Gfx.COLOR_RED, Gfx.COLOR_BLACK);
     if (screen_shape == System.SCREEN_SHAPE_ROUND)
        {

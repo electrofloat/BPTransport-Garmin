@@ -15,7 +15,7 @@ class WrapText {
   hidden var screenHeight;
   hidden var screenShape;
   hidden var linePadding = 1;   // Padding between lines
-  hidden var sidePadding = 3;   // Padding on the sides of the screen;
+  hidden var sidePadding = 5;   // Padding on the sides of the screen;
   hidden var roundMargin = 15;  // Minimal margin at the top of round screens;
   hidden var rectangleAlignment = Gfx.TEXT_JUSTIFY_LEFT;
   hidden var offset;            // Nr of lines to skip when scrolling

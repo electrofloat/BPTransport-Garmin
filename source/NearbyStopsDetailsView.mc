@@ -119,18 +119,31 @@ class NearbyStopsDetailsView extends Ui.View
     if (!download_done)
       {
         progress_lines.draw(dc, Gfx.COLOR_BLUE, Gfx.COLOR_BLACK, 8);
-
         dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
-        $.WRITER.writeLines(dc, "Downloading RealTime data...", Gfx.FONT_SYSTEM_TINY, dc.getHeight() / 2 - Gfx.getFontHeight(Gfx.FONT_SYSTEM_TINY));
+
+        var text_area = new Ui.TextArea({
+            :text=>"Downloading realtime data...",
+            :color=>Gfx.COLOR_WHITE,
+            :font=>[Gfx.FONT_MEDIUM, Gfx.FONT_SMALL, Gfx.FONT_SYSTEM_TINY, Gfx.FONT_SYSTEM_XTINY],
+            :justification=>Gfx.TEXT_JUSTIFY_CENTER,
+            :locX =>Ui.LAYOUT_HALIGN_CENTER,
+            :locY=>Ui.LAYOUT_VALIGN_CENTER,
+            :width=>dc.getWidth() * 0.8,
+            :height=>dc.getHeight() * 0.3
+        });
+
+        text_area.draw(dc);
         return;
       }
     dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
     dc.clear();
 
     var x = 5;
-    var y = 30;
+    var clock_height = 1 + Gfx.getFontHeight(Gfx.FONT_SYSTEM_TINY);
+    var y = clock_height;
     var fontheight = Gfx.getFontHeight(FONT);
-    var element_height = 50;
+    var element_height = (dc.getHeight() - clock_height) / DISPLAY_ELEMENTS;
+
     if  (nearby_stops_details_data_provider.nearby_stops_details_array.size() == 0)
       {
         $.WRITER.writeLines(dc, "No departures in the near future.", Gfx.FONT_SYSTEM_TINY, dc.getHeight() / 2 - Gfx.getFontHeight(Gfx.FONT_SYSTEM_TINY));
@@ -140,31 +153,36 @@ class NearbyStopsDetailsView extends Ui.View
     var now = new Time.Moment(Time.now().value());
     var now_greg = Gregorian.info(now, Time.FORMAT_SHORT);
     dc.setColor( Gfx.COLOR_DK_GRAY, Gfx.COLOR_BLACK );
-    dc.fillRectangle(0, 0, dc.getWidth(), 1 + Gfx.getFontHeight(Gfx.FONT_SYSTEM_TINY));
+    dc.fillRectangle(0, 0, dc.getWidth(), clock_height);
     dc.setColor( Gfx.COLOR_WHITE, Gfx.COLOR_DK_GRAY);
     dc.drawText(dc.getWidth() / 2, 0, Gfx.FONT_SYSTEM_TINY, Lang.format("$1$:$2$", [now_greg.hour.format("%02d"), now_greg.min.format("%02d")]), Gfx.TEXT_JUSTIFY_CENTER);
     dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
     for (var i = 0; i < DISPLAY_ELEMENTS; i++)
       {
          var local_y = y + (i * element_height);
+
          if (i == 0 && current_item == 0)
            {
-             dc.fillRectangle(0, 1 + Gfx.getFontHeight(Gfx.FONT_SYSTEM_TINY), dc.getWidth(), element_height);
+             dc.fillRectangle(0, clock_height, dc.getWidth(), element_height);
              continue;
            }
          if (current_item + i - 1 > nearby_stops_details_data_provider.nearby_stops_details_array.size() - 1)
            {
              dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
-             dc.fillRectangle(0, local_y - element_height + 2 * fontheight, dc.getWidth(), dc.getHeight());
+             dc.fillRectangle(0, local_y, dc.getWidth(), dc.getHeight());
              continue;
            }
          dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
 
          var item = nearby_stops_details_data_provider.nearby_stops_details_array[current_item + i - 1];
 
-         var width_at_pos = $.WRITER.getWidthForLine(local_y, fontheight);
+         var one_line_height = element_height / 2;
+         var first_line_y = local_y + ((one_line_height - fontheight) / 2);
+         var second_line_y = first_line_y + one_line_height;
+
+         var width_at_pos = $.WRITER.getWidthForLine(first_line_y, fontheight);
          dc.setColor(linenum_color, Gfx.COLOR_TRANSPARENT);
-         dc.drawText((dc.getWidth() - width_at_pos) / 2, local_y , FONT, item.get(NearbyStopsDetailsDataProvider.LINE_NUMBER), Gfx.TEXT_JUSTIFY_LEFT);
+         dc.drawText((dc.getWidth() - width_at_pos) / 2, first_line_y , FONT, item.get(NearbyStopsDetailsDataProvider.LINE_NUMBER), Gfx.TEXT_JUSTIFY_LEFT);
          dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
          var start_time = item.get(NearbyStopsDetailsDataProvider.START_TIME);
          //$.DEBUGGER.println(Lang.format("STARTTIME: $1$, download_done: $2$", [start_time, download_done]));
@@ -176,20 +194,20 @@ class NearbyStopsDetailsView extends Ui.View
            {
              center_time_x = center_time_x - 20;
            }
-         dc.drawText(center_time_x, local_y, FONT, Lang.format("$1$:$2$", [time.hour.format("%02d"), time.min.format("%02d")]), Gfx.TEXT_JUSTIFY_CENTER);
+         dc.drawText(center_time_x, first_line_y, FONT, Lang.format("$1$:$2$", [time.hour.format("%02d"), time.min.format("%02d")]), Gfx.TEXT_JUSTIFY_CENTER);
 
          if (predicted_start_time == 0)
            {
              predicted_start_time = start_time;
            }
          time = get_pred_time(predicted_start_time);
-         width_at_pos = $.WRITER.getWidthForLine(local_y + fontheight, fontheight);
-         dc.drawText((dc.getWidth() - width_at_pos) / 2, local_y + fontheight, FONT, item.get(NearbyStopsDetailsDataProvider.DIRECTION), Gfx.TEXT_JUSTIFY_LEFT);
-         dc.drawLine(0, local_y + 2 * fontheight, dc.getWidth(), local_y + 2 * fontheight);
+         width_at_pos = $.WRITER.getWidthForLine(second_line_y, fontheight);
+         dc.drawText((dc.getWidth() - width_at_pos) / 2, second_line_y, FONT, item.get(NearbyStopsDetailsDataProvider.DIRECTION), Gfx.TEXT_JUSTIFY_LEFT);
+         dc.drawLine(0, local_y, dc.getWidth(), local_y);
 
          dc.setColor(get_color_for_time(start_time, predicted_start_time), Gfx.COLOR_TRANSPARENT);
-         width_at_pos = $.WRITER.getWidthForLine(local_y, fontheight);
-         dc.drawText((dc.getWidth() - width_at_pos) / 2 + width_at_pos, local_y, FONT, time, Gfx.TEXT_JUSTIFY_RIGHT);
+         width_at_pos = $.WRITER.getWidthForLine(first_line_y, fontheight);
+         dc.drawText((dc.getWidth() - width_at_pos) / 2 + width_at_pos, first_line_y, FONT, time, Gfx.TEXT_JUSTIFY_RIGHT);
       }
   }
 
