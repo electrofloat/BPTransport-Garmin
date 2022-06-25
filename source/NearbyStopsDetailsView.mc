@@ -215,12 +215,12 @@ class NearbyStopsDetailsView extends Ui.View
   {
     if (start_time == predicted_start_time)
       {
-        return Gfx.COLOR_BLUE;
+        return Gfx.COLOR_GREEN;
       }
     else if (start_time + 30 > predicted_start_time &&
              start_time - 30 < predicted_start_time)
       {
-        return Gfx.COLOR_GREEN;
+        return Gfx.COLOR_BLUE;
       }
 
     return Gfx.COLOR_RED;
