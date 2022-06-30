@@ -64,8 +64,8 @@ class NearbyStopsView extends Ui.View
     if ($.debug)
       {
         //====== TEST_DATA ====== 
-        location[0] = NearbyStopsDataProvider.LAT;
-        location[1] = NearbyStopsDataProvider.LON;
+        location[0] = NearbyStopsDataProvider.TEST_LAT;
+        location[1] = NearbyStopsDataProvider.TEST_LON;
       }
 
     if (location[0] > UPPER_RIGHT_LAT ||

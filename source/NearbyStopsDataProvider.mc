@@ -24,8 +24,11 @@ using Toybox.System;
 class NearbyStopsDataProvider
 {
   //Blaha Lujza tér
-  public const LON=19.070510;
-  public const LAT=47.497099;
+  public const TEST_LON=19.070510;
+  public const TEST_LAT=47.497099;
+
+  private var LON = TEST_LON;
+  private var LAT = TEST_LAT;
 
   private var callback = null;
   public var nearby_stops_array = [];
@@ -49,11 +52,14 @@ class NearbyStopsDataProvider
 
   public function get_data(location, param_callback)
   {
+    LAT = location[0];
+    LON = location[1];
+
     callback = param_callback;
     var radius = Application.getApp().getProperty("radius");
     var url = Lang.format(
       "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/stops-for-location.json?lon=$1$&lat=$2$&radius=$3$",
-      [location[1].format("%f"), location[0].format("%f"), radius]
+      [LON.format("%f"), LAT.format("%f"), radius]
     );
     $.DEBUGGER.println(url);
 
