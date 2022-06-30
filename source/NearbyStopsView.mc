@@ -39,7 +39,8 @@ class NearbyStopsView extends Ui.View
   private var gps_done = false;
   private var out_of_zone = false;
   private var error_response_code = null;
-  private var download_done = false;
+  private var first_download_done = false;
+  private var download_in_progress = false;
   private var nearby_stops_sent = false;
 
   public function initialize()
@@ -78,12 +79,17 @@ class NearbyStopsView extends Ui.View
         return;
       }
     Ui.requestUpdate();
-
-    nearby_stops_data_provider.get_data(location, method(:on_data));
+    if (!download_in_progress)
+      {
+        download_in_progress = true;
+        location_provider.stop();
+        nearby_stops_data_provider.get_data(location, method(:on_data));
+      }
   }
 
   public function on_data(response_code)
   {
+    download_in_progress = false;
     if (response_code != 200)
       {
         error_response_code = response_code;
@@ -91,7 +97,7 @@ class NearbyStopsView extends Ui.View
         return;
       }
 
-    if (!download_done)
+    if (!first_download_done)
       {
         if (Attention has :vibrate)
           {
@@ -101,10 +107,11 @@ class NearbyStopsView extends Ui.View
               ];
              Attention.vibrate(vibeData);
           }
-        download_done = true;
+        first_download_done = true;
       }
     
     progress_lines.stop();
+    location_provider.start(method(:on_position));
 
     Ui.requestUpdate();
   }
@@ -282,7 +289,7 @@ class NearbyStopsView extends Ui.View
         text_area.draw(dc);
         return true;
       }
-    else if (!download_done)
+    else if (!first_download_done)
       {
         progress_lines.draw(dc, Gfx.COLOR_BLUE, Gfx.COLOR_BLACK, 8);
         dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
