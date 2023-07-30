@@ -138,7 +138,6 @@ class NearbyStopsDetailsView extends Ui.View
     dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
     dc.clear();
 
-    var x = 5;
     var clock_height = 1 + Gfx.getFontHeight(Gfx.FONT_SYSTEM_TINY);
     var y = clock_height;
     var fontheight = Gfx.getFontHeight(FONT);
