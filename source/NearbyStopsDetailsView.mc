@@ -21,12 +21,12 @@ using Toybox.Graphics as Gfx;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
 using Toybox.Timer;
+using Toybox.System;
 
 class NearbyStopsDetailsView extends Ui.View
 {
-
   private const FONT = Gfx.FONT_SYSTEM_XTINY;
-  private const DISPLAY_ELEMENTS = 4;
+  private var DISPLAY_ELEMENTS = 4;
   private var current_item = 0;
   private var update_timer = new Timer.Timer();
 
@@ -36,10 +36,18 @@ class NearbyStopsDetailsView extends Ui.View
   private var error_draw;
   private var linenum_color;
   private var nearby_stops_details_data_provider;
+  private var screen_shape;
 
   public function initialize(stop_id, color, current_item)
   {
     $.DEBUGGER.println(Lang.format("initialize, download_done: $1$", [download_done]));
+    var settings = System.getDeviceSettings();
+    screen_shape = settings.screenShape;
+    if (screen_shape == System.SCREEN_SHAPE_SEMI_OCTAGON)
+      {
+        DISPLAY_ELEMENTS = 3;
+      }
+  
     progress_lines = new ProgressLines();
     error_draw = new ErrorDraw();
     linenum_color = color;
@@ -181,7 +189,12 @@ class NearbyStopsDetailsView extends Ui.View
 
          var width_at_pos = $.WRITER.getWidthForLine(first_line_y, fontheight);
          dc.setColor(linenum_color, Gfx.COLOR_TRANSPARENT);
-         dc.drawText((dc.getWidth() - width_at_pos) / 2, first_line_y , FONT, item.get(NearbyStopsDetailsDataProvider.LINE_NUMBER), Gfx.TEXT_JUSTIFY_LEFT);
+         var x_pos = (dc.getWidth() - width_at_pos) / 2;
+         if (screen_shape == System.SCREEN_SHAPE_SEMI_OCTAGON)
+           {
+             x_pos = 5;
+           }
+         dc.drawText(x_pos, first_line_y , FONT, item.get(NearbyStopsDetailsDataProvider.LINE_NUMBER), Gfx.TEXT_JUSTIFY_LEFT);
          dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
          var start_time = item.get(NearbyStopsDetailsDataProvider.START_TIME);
          //$.DEBUGGER.println(Lang.format("STARTTIME: $1$, download_done: $2$", [start_time, download_done]));
@@ -189,7 +202,7 @@ class NearbyStopsDetailsView extends Ui.View
          var time_moment = new Time.Moment(start_time.toNumber());
          var time = Gregorian.info(time_moment, Time.FORMAT_SHORT);
          var center_time_x = dc.getWidth() / 2;
-         if (i == 0 || i == 3)
+         if ((i == 0 || i == DISPLAY_ELEMENTS - 1) && screen_shape != System.SCREEN_SHAPE_SEMI_OCTAGON)
            {
              center_time_x = center_time_x - 20;
            }
@@ -201,12 +214,26 @@ class NearbyStopsDetailsView extends Ui.View
            }
          time = get_pred_time(predicted_start_time);
          width_at_pos = $.WRITER.getWidthForLine(second_line_y, fontheight);
-         dc.drawText((dc.getWidth() - width_at_pos) / 2, second_line_y, FONT, item.get(NearbyStopsDetailsDataProvider.DIRECTION), Gfx.TEXT_JUSTIFY_LEFT);
+         x_pos = (dc.getWidth() - width_at_pos) / 2;
+         if (screen_shape == System.SCREEN_SHAPE_SEMI_OCTAGON)
+           {
+             x_pos = 5;
+           }
+         dc.drawText(x_pos, second_line_y, FONT, item.get(NearbyStopsDetailsDataProvider.DIRECTION), Gfx.TEXT_JUSTIFY_LEFT);
          dc.drawLine(0, local_y, dc.getWidth(), local_y);
 
-         dc.setColor(get_color_for_time(start_time, predicted_start_time), Gfx.COLOR_TRANSPARENT);
-         width_at_pos = $.WRITER.getWidthForLine(first_line_y, fontheight);
-         dc.drawText((dc.getWidth() - width_at_pos) / 2 + width_at_pos, first_line_y, FONT, time, Gfx.TEXT_JUSTIFY_RIGHT);
+         if (screen_shape == System.SCREEN_SHAPE_SEMI_OCTAGON)
+           {
+             width_at_pos = dc.getTextWidthInPixels(time, FONT);
+             //$.DEBUGGER.println(Lang.format("width at pos: $1$, width: $2$", [width_at_pos, dc.getWidth()]));
+             dc.drawText(dc.getWidth() - width_at_pos - 5, first_line_y, FONT, time, Gfx.TEXT_JUSTIFY_LEFT);
+           }
+         else 
+           {
+             dc.setColor(get_color_for_time(start_time, predicted_start_time), Gfx.COLOR_TRANSPARENT);
+             width_at_pos = $.WRITER.getWidthForLine(first_line_y, fontheight);
+             dc.drawText((dc.getWidth() - width_at_pos) / 2 + width_at_pos, first_line_y, FONT, time, Gfx.TEXT_JUSTIFY_RIGHT);
+           }
       }
   }
 
@@ -252,8 +279,14 @@ class NearbyStopsDetailsView extends Ui.View
     var hour = seconds / 3600;
     var minute = (seconds / 60) % 60;
     var second = seconds % 60;
-
-    return Lang.format("$1$$2$:$3$:$4$", [string, hour.format("%02d"), minute.format("%02d"), second.format("%02d")]);
+    if (screen_shape == System.SCREEN_SHAPE_SEMI_OCTAGON)
+      {
+        return Lang.format("$1$$2$:$3$", [string, minute.format("%02d"), second.format("%02d")]);
+      }
+    else 
+      {
+        return Lang.format("$1$$2$:$3$:$4$", [string, hour.format("%02d"), minute.format("%02d"), second.format("%02d")]);
+      }
   }
 
   public function onShow()

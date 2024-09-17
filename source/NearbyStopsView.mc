@@ -235,9 +235,17 @@ class NearbyStopsView extends Ui.View
             lines_color = text_color;
           }
         dc.setColor(lines_color, Gfx.COLOR_TRANSPARENT);
-        dc.drawText(x, third_line_y , FONT, item.get(NearbyStopsDataProvider.LINES), Gfx.TEXT_JUSTIFY_LEFT);
-        dc.setColor(text_color, Gfx.COLOR_TRANSPARENT );
         var distance = Lang.format("$1$m", [Math.round(item.get(NearbyStopsDataProvider.DISTANCE)).format("%d")]);
+        var distance_width = dc.getTextWidthInPixels(distance, FONT);
+        var lines_text = Gfx.fitTextToArea(item.get(NearbyStopsDataProvider.LINES), FONT, dc.getWidth() - distance_width - x, fontheight, false);
+
+        if (lines_text == null)
+          {
+            lines_text = Gfx.fitTextToArea(item.get(NearbyStopsDataProvider.LINES), FONT, dc.getWidth() - distance_width - x, fontheight, true);
+          }
+        dc.drawText(x, third_line_y , FONT, lines_text, Gfx.TEXT_JUSTIFY_LEFT);
+        dc.setColor(text_color, Gfx.COLOR_TRANSPARENT );
+
         dc.drawText(x + dc.getWidth() - 10, third_line_y, FONT, distance, Gfx.TEXT_JUSTIFY_RIGHT);
         //dc.drawLine(0, local_y + 3 * fontheight + 10, dc.getWidth(), local_y + 3 * fontheight + 10);
       }
