@@ -287,11 +287,11 @@ class NearbyStopsView extends Ui.View
             :text=>"Acquiring GPS Signal...",
             :color=>Gfx.COLOR_WHITE,
             :font=>[Gfx.FONT_MEDIUM, Gfx.FONT_SMALL, Gfx.FONT_SYSTEM_TINY, Gfx.FONT_SYSTEM_XTINY],
-            :justification=>Gfx.TEXT_JUSTIFY_CENTER,
+            :justification=>Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER,
             :locX =>Ui.LAYOUT_HALIGN_CENTER,
             :locY=>Ui.LAYOUT_VALIGN_CENTER,
             :width=>dc.getWidth() * 0.8,
-            :height=>dc.getHeight() * 0.3
+            :height=>dc.getHeight() * 0.7
         });
 
         text_area.draw(dc);
@@ -306,11 +306,11 @@ class NearbyStopsView extends Ui.View
             :text=>"Downloading realtime data...",
             :color=>Gfx.COLOR_WHITE,
             :font=>[Gfx.FONT_MEDIUM, Gfx.FONT_SMALL, Gfx.FONT_SYSTEM_TINY, Gfx.FONT_SYSTEM_XTINY],
-            :justification=>Gfx.TEXT_JUSTIFY_CENTER,
+            :justification=>Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER,
             :locX =>Ui.LAYOUT_HALIGN_CENTER,
             :locY=>Ui.LAYOUT_VALIGN_CENTER,
             :width=>dc.getWidth() * 0.8,
-            :height=>dc.getHeight() * 0.3
+            :height=>dc.getHeight() * 0.7
         });
 
         text_area.draw(dc);

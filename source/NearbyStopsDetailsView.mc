@@ -133,11 +133,11 @@ class NearbyStopsDetailsView extends Ui.View
             :text=>"Downloading realtime data...",
             :color=>Gfx.COLOR_WHITE,
             :font=>[Gfx.FONT_MEDIUM, Gfx.FONT_SMALL, Gfx.FONT_SYSTEM_TINY, Gfx.FONT_SYSTEM_XTINY],
-            :justification=>Gfx.TEXT_JUSTIFY_CENTER,
+            :justification=>Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER,
             :locX =>Ui.LAYOUT_HALIGN_CENTER,
             :locY=>Ui.LAYOUT_VALIGN_CENTER,
             :width=>dc.getWidth() * 0.8,
-            :height=>dc.getHeight() * 0.3
+            :height=>dc.getHeight() * 0.7
         });
 
         text_area.draw(dc);
@@ -153,7 +153,18 @@ class NearbyStopsDetailsView extends Ui.View
 
     if  (nearby_stops_details_data_provider.nearby_stops_details_array.size() == 0)
       {
-        $.WRITER.writeLines(dc, "No departures in the near future.", Gfx.FONT_SYSTEM_TINY, dc.getHeight() / 2 - Gfx.getFontHeight(Gfx.FONT_SYSTEM_TINY));
+        var text_area = new Ui.TextArea({
+            :text=>"No departures in the near future.",
+            :color=>Gfx.COLOR_BLACK,
+            :font=>[Gfx.FONT_MEDIUM, Gfx.FONT_SMALL, Gfx.FONT_SYSTEM_TINY, Gfx.FONT_SYSTEM_XTINY],
+            :justification=>Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER,
+            :locX =>Ui.LAYOUT_HALIGN_CENTER,
+            :locY=>Ui.LAYOUT_VALIGN_CENTER,
+            :width=>dc.getWidth() * 0.8,
+            :height=>dc.getHeight() * 0.7
+        });
+
+        text_area.draw(dc);
         return;
       }
 

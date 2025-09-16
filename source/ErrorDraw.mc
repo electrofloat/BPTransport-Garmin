@@ -47,11 +47,11 @@ class ErrorDraw
             :text=>text,
             :color=>Gfx.COLOR_WHITE,
             :font=>[Gfx.FONT_MEDIUM, Gfx.FONT_SMALL, Gfx.FONT_SYSTEM_TINY, Gfx.FONT_SYSTEM_XTINY],
-            :justification=>Gfx.TEXT_JUSTIFY_CENTER,
+            :justification=>Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER,
             :locX =>Ui.LAYOUT_HALIGN_CENTER,
             :locY=>Ui.LAYOUT_VALIGN_CENTER,
-            :width=>dc.getWidth() * 0.87,
-            :height=>dc.getHeight() * 0.37
+            :width=>dc.getWidth() * 0.80,
+            :height=>dc.getHeight() * 0.75
         });
 
     text_area.draw(dc);
