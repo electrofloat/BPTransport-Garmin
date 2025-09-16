@@ -8,6 +8,7 @@ using Toybox.System;
 using Toybox.Graphics as Gfx;
 using Toybox.Math;
 using Toybox.Timer;
+import Toybox.Lang;
 
 class WrapText {
 
@@ -82,7 +83,7 @@ class WrapText {
   }
 
   // Splits the text into a part that fits on the line, and the remaining text
-  function lineSplit(dc, text, font, width) {
+  function lineSplit(dc, text, font, width) as Lang.Array<Lang.String>{
     var os = 0;
     var parts = wordSplit(text, os);
     var count = 0;
@@ -98,7 +99,7 @@ class WrapText {
   }
 
   // Splits the subject into first word and remaining text (if exists)
-  function wordSplit(subject, start) {
+  function wordSplit(subject, start) as Lang.Array<Lang.String>{
     var len = subject.length();
     var substr = subject.substring(start, len);
     var ptr = substr.find(" ");
@@ -146,7 +147,7 @@ class WrapText {
     return w.toNumber();
   }
 
-  function scroll() {
+  function scroll() as Void{
     if (overflow) {
       offset += scrollStep;
     } else {

@@ -18,11 +18,12 @@
 
 using Toybox.Communications as Comm;
 using Toybox.Graphics as Gfx;
+import Toybox.Lang;
 
 class NearbyStopsDetailsDataProvider
 {
   private var callback;
-  public var nearby_stops_details_array = [];
+  public var nearby_stops_details_array as Lang.Array = [];
   enum {
     LINE_NUMBER,
     START_TIME,
@@ -53,7 +54,7 @@ class NearbyStopsDetailsDataProvider
     method(:response_callback));
   }
 
-  public function response_callback(response_code, data)
+  public function response_callback(response_code as Lang.Number, data as Lang.Dictionary) as Void
   {
     $.DEBUGGER.println(response_code);
     $.DEBUGGER.println(data);
@@ -68,27 +69,27 @@ class NearbyStopsDetailsDataProvider
 
     try
       {
-        var json_data = data.get("data");
+        var json_data = data.get("data") as Lang.Dictionary or Null;
         if (json_data == null)
           {
             throw new JsonParseException();
           }
-        var references = json_data.get("references");
+        var references = json_data.get("references") as Lang.Dictionary or Null;
         if (references == null)
           {
             throw new JsonParseException();
           }
-        var routes = references.get("routes");
+        var routes = references.get("routes") as Lang.Dictionary or Null;
         if (routes == null)
           {
             throw new JsonParseException();
           }
-        var trips = references.get("trips");
+        var trips = references.get("trips") as Lang.Dictionary or Null;
         if (trips == null)
           {
             throw new JsonParseException();
           }
-        var entry = json_data.get("entry");
+        var entry = json_data.get("entry") as Lang.Dictionary or Null;
         if (entry == null)
           {
             throw new JsonParseException();
@@ -125,7 +126,7 @@ class NearbyStopsDetailsDataProvider
                 continue;
               }
 
-            var trip = trips.get(trip_id);
+            var trip = trips.get(trip_id) as Lang.Dictionary or Null;
             if (trip == null)
               {
                 continue;
@@ -138,7 +139,7 @@ class NearbyStopsDetailsDataProvider
               }
             direction = trip.get("tripHeadsign");
 
-            var route = routes.get(route_id);
+            var route = routes.get(route_id) as Lang.Dictionary or Null;
             if (route == null)
               {
                 continue;
@@ -174,13 +175,13 @@ class NearbyStopsDetailsDataProvider
     callback = null;
   }
   
-  public function populate_array_from_online_data(data)
+  public function populate_array_from_online_data(data as Lang.Array)
   {
     $.DEBUGGER.println("populate array from online data: data");
     nearby_stops_details_array = [];
     for (var i = 0; i < data.size(); i++)
       {
-        var dict = data[i];
+        var dict = data[i] as Lang.Dictionary;
         fill_nearby_stops_details_array(dict["start_time"], dict["pred_start"], dict["direction"], dict["line_num"]);
       }
   }

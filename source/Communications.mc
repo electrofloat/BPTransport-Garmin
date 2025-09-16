@@ -19,11 +19,12 @@
 using Toybox.Communications as Comm;
 using Toybox.WatchUi as Ui;
 using Toybox.Timer;
+import Toybox.Lang;
 
 var ANSWER_TIMER = new Timer.Timer();
 var COMM_TIMER = new Timer.Timer();
 var COMM_RETRY = 0;
-var MESSAGE_QUEUE = [];
+var MESSAGE_QUEUE as Lang.Array = [];
 
 enum
   {
@@ -172,10 +173,11 @@ class Communications
     $.DEBUGGER.println("send exit");
   }
   
-  public function on_received(msg)
+  public function on_received(msg as Comm.PhoneAppMessage) as Void
   {
     $.DEBUGGER.println(Lang.format("data: $1$", [msg.data.toString()]));
-    if (msg.data[0] == MESSAGE_TYPE_GET_LANGUAGE_REPLY)
+    var array_data = msg.data as Lang.Array;
+    if (array_data[0] == MESSAGE_TYPE_GET_LANGUAGE_REPLY)
       {
         $.wait_for_answer = false;
         $.ANSWER_TIMER.stop();

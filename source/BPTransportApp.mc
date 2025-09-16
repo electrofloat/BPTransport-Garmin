@@ -40,7 +40,7 @@ class BPTransportApp extends App.AppBase {
     AppBase.initialize();
     $.data_in_progress = null;
     $.wait_for_answer = false;
-    $.NEW_LAYOUT = App.getApp().getProperty("newlayout");
+    $.NEW_LAYOUT = App.Properties.getValue("newlayout");
 
     var settings = System.getDeviceSettings();
     $.SCREEN_SHAPE = settings.screenShape;

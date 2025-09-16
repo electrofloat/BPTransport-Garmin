@@ -19,6 +19,7 @@
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
 using Toybox.Attention;
+import Toybox.Lang;
 
 class NearbyStopsView extends Ui.View
 {
@@ -35,7 +36,7 @@ class NearbyStopsView extends Ui.View
   private var nearby_stops_data_provider;
   private var progress_lines;
   private var error_draw;
-  private var location;
+  private var location as Lang.Array or Null;
   private var gps_done = false;
   private var out_of_zone = false;
   private var error_response_code = null;
@@ -116,7 +117,7 @@ class NearbyStopsView extends Ui.View
     Ui.requestUpdate();
   }
 
-  public function on_get_nearby_stops(data)
+  public function on_get_nearby_stops(data as Lang.Array)
   {
     if (data.size() == 0 ||
         data[0] != MESSAGE_TYPE_GET_NEARBY_STOPS_REPLY)

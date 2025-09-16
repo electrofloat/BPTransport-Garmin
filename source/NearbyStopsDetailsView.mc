@@ -22,6 +22,7 @@ using Toybox.Time;
 using Toybox.Time.Gregorian;
 using Toybox.Timer;
 using Toybox.System;
+import Toybox.Lang;
 
 class NearbyStopsDetailsView extends Ui.View
 {
@@ -85,7 +86,7 @@ class NearbyStopsDetailsView extends Ui.View
     View.initialize();
   }
 
-  public function on_get_nearby_stops_details(data)
+  public function on_get_nearby_stops_details(data as Lang.Array)
   {
     if (data.size() == 0 ||
         data[0] != MESSAGE_TYPE_GET_NEARBY_STOPS_DETAILS_REPLY)
@@ -324,7 +325,7 @@ class NearbyStopsDetailsView extends Ui.View
 
             var item = nearby_stops_details_data_provider.nearby_stops_details_array[current_item + i - 1];
 
-            var one_line_height = element_height / 2;
+            //var one_line_height = element_height / 2;
             var first_line_y = local_y + (element_height * 0.05);
             var second_line_y = local_y + (element_height * 0.3);
 

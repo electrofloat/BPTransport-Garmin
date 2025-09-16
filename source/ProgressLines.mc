@@ -75,7 +75,7 @@ class ProgressLines
     $.DEBUGGER.println("Progress timer stopped");
   }
 
-  public function timer_callback()
+  public function timer_callback() as Void
   {
     outer_fi = outer_fi + outer_speed;
     if (outer_fi > 360)

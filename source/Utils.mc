@@ -17,16 +17,19 @@
 */
 
 using Toybox.Math;
+import Toybox.Lang;
 
 class Utils
 {
   public function get_distance(location, stop_location)
   {
     var R = 6371e3;
-    var fi1 = location.toRadians()[0];
-    var fi2 = stop_location.toRadians()[0];
+    var location_array = location.toRadians() as Lang.Array<Lang.Double>;
+    var fi1 = location_array[0];
+    var stop_location_array = stop_location.toRadians() as Lang.Array<Lang.Double>;
+    var fi2 = stop_location_array[0];
     var delta_fi = fi2-fi1;
-    var delta_lambda = stop_location.toRadians()[1] - location.toRadians()[1];
+    var delta_lambda = stop_location_array[1] - location_array[1];
 
     var a = Math.sin(delta_fi/2) * Math.sin(delta_fi/2) +
         Math.cos(fi1) * Math.cos(fi2) *
@@ -39,13 +42,16 @@ class Utils
     return ret_value;
   }
 
-  public function get_simple_distance(location, stop_location)
+  public static function get_simple_distance(location, stop_location)
   {
     var R = 6371e3;
-    var fi1 = location.toRadians()[0];
-    var fi2 = stop_location.toRadians()[0];
+    var location_array = location.toRadians() as Lang.Array<Lang.Double>;
+    var fi1 = location_array[0];
+    var stop_location_array = stop_location.toRadians() as Lang.Array<Lang.Double>;
+    var fi2 = stop_location_array[0];
+
     var delta_fi = fi2-fi1;
-    var delta_lambda = stop_location.toRadians()[1] - location.toRadians()[1];
+    var delta_lambda = stop_location_array[1] - location_array[1];
 
     var x = delta_lambda * Math.cos((fi1+fi2)/2);
 
@@ -54,7 +60,7 @@ class Utils
     return ret_value;
   }
 
-  public function get_text_for_error_code(error_code)
+  public static function get_text_for_error_code(error_code)
   {
     if (error_code == -1001)
       {

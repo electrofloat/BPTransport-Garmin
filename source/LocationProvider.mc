@@ -32,7 +32,7 @@ class LocationProvider
   {
   }
 
-  public function on_position(param_info)
+  public function on_position(param_info as Position.Info) as Void
   {
 
     if (param_info.accuracy < Position.QUALITY_USABLE)

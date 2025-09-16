@@ -20,18 +20,19 @@ using Toybox.Communications as Comm;
 using Toybox.Graphics as Gfx;
 using Toybox.Position;
 using Toybox.System;
+import Toybox.Lang;
 
 class NearbyStopsDataProvider
 {
   //Blaha Lujza tér
-  public const TEST_LON=19.070510;
-  public const TEST_LAT=47.497099;
+  public static const TEST_LON=19.070510;
+  public static const TEST_LAT=47.497099;
 
   private var LON = TEST_LON;
   private var LAT = TEST_LAT;
 
   private var callback = null;
-  public var nearby_stops_array = [];
+  public var nearby_stops_array as Lang.Array<Lang.Dictionary> = [];
   hidden var screen_shape;
 
   enum {
@@ -51,13 +52,13 @@ class NearbyStopsDataProvider
     screen_shape = settings.screenShape;
   }
 
-  public function get_data(location, param_callback)
+  public function get_data(location as Array, param_callback)
   {
     LAT = location[0];
     LON = location[1];
 
     callback = param_callback;
-    var radius = Application.getApp().getProperty("radius");
+    var radius = Application.Properties.getValue("radius");
     var url = Lang.format(
       "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/stops-for-location.json?key=$1$&lon=$2$&lat=$3$&radius=$4$",
       [BKK_API_KEY, LON.format("%f"), LAT.format("%f"), radius]
@@ -73,7 +74,7 @@ class NearbyStopsDataProvider
     method(:response_callback));
   }
 
-  public function response_callback(response_code, data)
+  public function response_callback(response_code as Lang.Number, data as Lang.Dictionary) as Void
   {
     $.DEBUGGER.println(response_code);
     $.DEBUGGER.println(data);
@@ -87,7 +88,7 @@ class NearbyStopsDataProvider
       }
     try
       {
-        var json_data = data.get("data");
+        var json_data = data.get("data") as Lang.Dictionary or Null;
         if (json_data == null)
           {
             throw new JsonParseException();
@@ -98,12 +99,12 @@ class NearbyStopsDataProvider
           {
             throw new JsonParseException();
           }
-        var references = json_data.get("references");
+        var references = json_data.get("references") as Lang.Dictionary or Null;
         if (references == null)
           {
             throw new JsonParseException();
           }
-        var routes = references.get("routes");
+        var routes = references.get("routes") as Lang.Dictionary or Null;
         if (routes == null)
           {
             throw new JsonParseException();
@@ -168,7 +169,7 @@ class NearbyStopsDataProvider
             var color_text = null;
             for (; j < route_ids.size(); j++)
               {
-                var route = routes.get(route_ids[j]);
+                var route = routes.get(route_ids[j]) as Lang.Dictionary or Null;
                 if (route == null)
                   {
                     break;
@@ -187,10 +188,10 @@ class NearbyStopsDataProvider
                   }
                 if (color_text == null)
                   {
-                    var style = route.get("style");
+                    var style = route.get("style") as Lang.Dictionary or Null;
                     if (style != null)
                       {
-                        var vehicleicon = style.get("vehicleIcon");
+                        var vehicleicon = style.get("vehicleIcon") as Lang.Dictionary or Null;
                         if (vehicleicon != null)
                           {
                             color_text = vehicleicon.get("name");
@@ -233,12 +234,12 @@ class NearbyStopsDataProvider
     callback = null;
   }
   
-  public function populate_array_from_online_data(data)
+  public function populate_array_from_online_data(data as Lang.Array)
   {
     nearby_stops_array = [];
     for (var i = 0; i < data.size(); i++)
       {
-        var dict = data[i];
+        var dict = data[i] as Lang.Dictionary;
         fill_nearby_stops_array(dict["stop_color_type"], dict["stop_id"], dict["stop_name"], dict["direction_name"], dict["line_numbers"], dict["distance"]);
       }
   }
@@ -314,7 +315,7 @@ class NearbyStopsDataProvider
     for (var i = 1; i < nearby_stops_array.size(); i++)
       {
         var j = i;
-        while ((j > 0) && (nearby_stops_array[j - 1].get(DISTANCE) > nearby_stops_array[j].get(DISTANCE)))
+        while ((j > 0) && (nearby_stops_array[j - 1].get(DISTANCE) as Lang.Number > nearby_stops_array[j].get(DISTANCE) as Lang.Number))
         {
           var temp = nearby_stops_array[j];
           nearby_stops_array[j] = nearby_stops_array[j - 1];
