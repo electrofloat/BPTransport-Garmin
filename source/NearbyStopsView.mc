@@ -172,6 +172,12 @@ class NearbyStopsView extends Ui.View
           }
       }
 
+    var array_size = nearby_stops_data_provider.nearby_stops_array.size();
+    if ((array_size > 0) && (current_item > (nearby_stops_data_provider.nearby_stops_array.size() - 1)))
+      {
+        current_item = nearby_stops_data_provider.nearby_stops_array.size() - 1;
+      }
+
     dc.setPenWidth(1);
 
     if (handle_errors(dc))
