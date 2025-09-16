@@ -161,9 +161,10 @@ class NearbyStopsDataProvider
               {
                 continue;
               }
-            var color_text = list[i].get("stopColorType");
+            //var color_text = list[i].get("stopColorType");
 
             var j = 0;
+            var color_text = null;
             for (; j < route_ids.size(); j++)
               {
                 var route = routes.get(route_ids[j]);
@@ -182,6 +183,18 @@ class NearbyStopsDataProvider
                 if (direction == null)
                   {
                     direction = Lang.format("->$1$", [route.get("description")]);
+                  }
+                if (color_text == null)
+                  {
+                    var style = route.get("style");
+                    if (style != null)
+                      {
+                        var vehicleicon = style.get("vehicleIcon");
+                        if (vehicleicon != null)
+                          {
+                            color_text = vehicleicon.get("name");
+                          }
+                      }
                   }
               }
             if (j != route_ids.size())
@@ -258,23 +271,23 @@ class NearbyStopsDataProvider
         trolleybus_color = Gfx.COLOR_BLACK;
       }
 
-    if (color_text.equals("TRAM"))
+    if (color_text.equals("TRAM") || color_text.equals("tram"))
       {
         return [tram_color, Rez.Drawables.tram];
       }
-    else if (color_text.equals("BUS"))
+    else if (color_text.equals("BUS") || color_text.equals("bus"))
       {
         return [bus_color, Rez.Drawables.bus];
       }
-    else if (color_text.equals("NIGHTBUS"))
+    else if (color_text.equals("NIGHTBUS") || color_text.equals("night-bus"))
       {
         return [nightbus_color, Rez.Drawables.nightbus];
       }
-    else if (color_text.equals("TROLLEYBUS"))
+    else if (color_text.equals("TROLLEYBUS") || color_text.equals("trolleybus"))
       {
         return [trolleybus_color, Rez.Drawables.trolley];
       }
-    else if (color_text.equals("M1") || color_text.equals("M2") || color_text.equals("M3") || color_text.equals("M4"))
+    else if (color_text.equals("M1") || color_text.equals("M2") || color_text.equals("M3") || color_text.equals("M4") || color_text.equals("subway"))
       {
         return [Gfx.COLOR_BLACK, Rez.Drawables.metro];
       }
