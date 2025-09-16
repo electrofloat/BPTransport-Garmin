@@ -28,6 +28,8 @@ var DEBUGGER = new Debugger(debug);
 var COMM;
 var HAS_PHONE_APP = false;
 var WAIT_FOR_DATA = false;
+var NEW_LAYOUT = false;
+var SCREEN_SHAPE;
 var data_in_progress;
 var wait_for_answer;
 
@@ -38,6 +40,11 @@ class BPTransportApp extends App.AppBase {
     AppBase.initialize();
     $.data_in_progress = null;
     $.wait_for_answer = false;
+    $.NEW_LAYOUT = App.getApp().getProperty("newlayout");
+
+    var settings = System.getDeviceSettings();
+    $.SCREEN_SHAPE = settings.screenShape;
+
     //$.COMM = new Communications();
     //$.COMM.initializer();
   }

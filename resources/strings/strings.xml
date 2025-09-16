@@ -3,5 +3,6 @@
 
     <string id="prompt">Acquiring GPS location</string>
     <string id="radius">Radius (in meters) in which to search for stops around your location</string>
+    <string id="newlayout">Use the new layout (bigger font, less data on one screen)</string>
 
 </strings>

@@ -25,7 +25,7 @@ using Toybox.System;
 
 class NearbyStopsDetailsView extends Ui.View
 {
-  private const FONT = Gfx.FONT_SYSTEM_XTINY;
+  private var FONT = Gfx.FONT_SYSTEM_XTINY;
   private var DISPLAY_ELEMENTS = 4;
   private var current_item = 0;
   private var update_timer = new Timer.Timer();
@@ -35,15 +35,19 @@ class NearbyStopsDetailsView extends Ui.View
   private var progress_lines;
   private var error_draw;
   private var linenum_color;
+  private var linenum_color2;
   private var nearby_stops_details_data_provider;
-  private var screen_shape;
-
-  public function initialize(stop_id, color, current_item)
+    
+  public function initialize(stop_id, color, color2, nearby_stops_current_item)
   {
     $.DEBUGGER.println(Lang.format("initialize, download_done: $1$", [download_done]));
-    var settings = System.getDeviceSettings();
-    screen_shape = settings.screenShape;
-    if (screen_shape == System.SCREEN_SHAPE_SEMI_OCTAGON)
+    
+    if ($.NEW_LAYOUT)
+      {
+        current_item = 1;
+      }
+
+    if ($.SCREEN_SHAPE == System.SCREEN_SHAPE_SEMI_OCTAGON)
       {
         DISPLAY_ELEMENTS = 3;
       }
@@ -51,10 +55,11 @@ class NearbyStopsDetailsView extends Ui.View
     progress_lines = new ProgressLines();
     error_draw = new ErrorDraw();
     linenum_color = color;
+    linenum_color2 = color2;
     nearby_stops_details_data_provider = new NearbyStopsDetailsDataProvider();
     if ($.HAS_PHONE_APP)
       {
-        $.COMM.send_get_nearby_stops_details(current_item, method(:on_get_nearby_stops_details));
+        $.COMM.send_get_nearby_stops_details(nearby_stops_current_item, method(:on_get_nearby_stops_details));
       }
     else if ($.debug && $.FAKE_FUTAR_DATA)
         {
@@ -112,6 +117,70 @@ class NearbyStopsDetailsView extends Ui.View
     Ui.requestUpdate();
   }
 
+  private function draw_arrow(dc, clock_height, bottom_height, element_height)
+  {
+    var y = clock_height + element_height;
+    dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_TRANSPARENT);
+    dc.drawLine(0, y, dc.getWidth(), y);
+    y = y + element_height;
+    dc.drawLine(0, y, dc.getWidth(), y);
+    if (current_item < nearby_stops_details_data_provider.nearby_stops_details_array.size() - 1)
+      {
+        dc.setColor(Gfx.COLOR_DK_GREEN, Gfx.COLOR_TRANSPARENT);
+        dc.fillRectangle(0, dc.getHeight() - bottom_height + 1, dc.getWidth(), dc.getHeight());
+        if ($.SCREEN_SHAPE == System.SCREEN_SHAPE_SEMI_OCTAGON)
+          {
+            dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+          }
+        else
+          {
+            dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_TRANSPARENT);
+          }
+        
+        dc.drawText((dc.getWidth() / 2) , dc.getHeight() - bottom_height - 8, Gfx.FONT_TINY, "->", Gfx.TEXT_JUSTIFY_CENTER);
+      }
+    else
+      {
+        dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+        dc.fillRectangle(0, y + 1, dc.getWidth(), dc.getHeight());
+      }
+  }
+
+  private function draw_countdown_timer(dc, time, color, font, y)
+  {
+    if ($.SCREEN_SHAPE == System.SCREEN_SHAPE_SEMI_OCTAGON)
+      {
+        var width_at_pos = dc.getTextWidthInPixels(time, font);
+        //$.DEBUGGER.println(Lang.format("width at pos: $1$, width: $2$", [width_at_pos, dc.getWidth()]));
+        dc.drawText(dc.getWidth() - width_at_pos - 5, y, font, time, Gfx.TEXT_JUSTIFY_LEFT);
+
+        return;
+      }
+
+    var fontheight = dc.getFontHeight(font);
+    if ($.NEW_LAYOUT)
+      {
+        dc.setColor(Gfx.COLOR_WHITE, color);
+      }
+    else
+      {
+        dc.setColor(color, Gfx.COLOR_TRANSPARENT);
+      }
+    var width_at_pos = $.WRITER.getWidthForLine(y + 5, fontheight);
+    dc.drawText((dc.getWidth() - width_at_pos) / 2 + width_at_pos, y, font, time, Gfx.TEXT_JUSTIFY_RIGHT);
+  }
+
+  private function draw_center_time(dc, x, y, font, start_time)
+  {
+    var time_moment = new Time.Moment(start_time.toNumber());
+    var time = Gregorian.info(time_moment, Time.FORMAT_SHORT);
+
+    dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
+    dc.drawText(x, y, font, Lang.format("$1$:$2$", [time.hour.format("%02d"), time.min.format("%02d")]), Gfx.TEXT_JUSTIFY_CENTER);
+
+    return time;
+  }
+
   public function onUpdate(dc)
   {
     //$.DEBUGGER.println("onupdate");
@@ -148,9 +217,7 @@ class NearbyStopsDetailsView extends Ui.View
 
     var clock_height = 1 + Gfx.getFontHeight(Gfx.FONT_SYSTEM_TINY);
     var y = clock_height;
-    var fontheight = Gfx.getFontHeight(FONT);
-    var element_height = (dc.getHeight() - clock_height) / DISPLAY_ELEMENTS;
-
+    
     if  (nearby_stops_details_data_provider.nearby_stops_details_array.size() == 0)
       {
         var text_area = new Ui.TextArea({
@@ -175,6 +242,11 @@ class NearbyStopsDetailsView extends Ui.View
     dc.setColor( Gfx.COLOR_WHITE, Gfx.COLOR_DK_GRAY);
     dc.drawText(dc.getWidth() / 2, 0, Gfx.FONT_SYSTEM_TINY, Lang.format("$1$:$2$", [now_greg.hour.format("%02d"), now_greg.min.format("%02d")]), Gfx.TEXT_JUSTIFY_CENTER);
     dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
+    
+    if (!$.NEW_LAYOUT)
+    {
+      var fontheight = Gfx.getFontHeight(FONT);
+      var element_height = (dc.getHeight() - clock_height) / DISPLAY_ELEMENTS;
     for (var i = 0; i < DISPLAY_ELEMENTS; i++)
       {
          var local_y = y + (i * element_height);
@@ -201,50 +273,113 @@ class NearbyStopsDetailsView extends Ui.View
          var width_at_pos = $.WRITER.getWidthForLine(first_line_y, fontheight);
          dc.setColor(linenum_color, Gfx.COLOR_TRANSPARENT);
          var x_pos = (dc.getWidth() - width_at_pos) / 2;
-         if (screen_shape == System.SCREEN_SHAPE_SEMI_OCTAGON)
+         if ($.SCREEN_SHAPE == System.SCREEN_SHAPE_SEMI_OCTAGON)
            {
              x_pos = 5;
            }
          dc.drawText(x_pos, first_line_y , FONT, item.get(NearbyStopsDetailsDataProvider.LINE_NUMBER), Gfx.TEXT_JUSTIFY_LEFT);
-         dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
+
          var start_time = item.get(NearbyStopsDetailsDataProvider.START_TIME);
          //$.DEBUGGER.println(Lang.format("STARTTIME: $1$, download_done: $2$", [start_time, download_done]));
          var predicted_start_time = item.get(NearbyStopsDetailsDataProvider.PREDICTED_START_TIME);
-         var time_moment = new Time.Moment(start_time.toNumber());
-         var time = Gregorian.info(time_moment, Time.FORMAT_SHORT);
          var center_time_x = dc.getWidth() / 2;
-         if ((i == 0 || i == DISPLAY_ELEMENTS - 1) && screen_shape != System.SCREEN_SHAPE_SEMI_OCTAGON)
+         if ((i == 0 || i == DISPLAY_ELEMENTS - 1) && $.SCREEN_SHAPE != System.SCREEN_SHAPE_SEMI_OCTAGON)
            {
              center_time_x = center_time_x - 20;
            }
-         dc.drawText(center_time_x, first_line_y, FONT, Lang.format("$1$:$2$", [time.hour.format("%02d"), time.min.format("%02d")]), Gfx.TEXT_JUSTIFY_CENTER);
+         var time = draw_center_time(dc, center_time_x, first_line_y, FONT, start_time);
 
          if (predicted_start_time == 0)
            {
              predicted_start_time = start_time;
            }
          time = get_pred_time(predicted_start_time);
+         var time_color = get_color_for_time(start_time, predicted_start_time);
+
+         draw_countdown_timer(dc, time, time_color, FONT, first_line_y);
+
+         dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
          width_at_pos = $.WRITER.getWidthForLine(second_line_y, fontheight);
          x_pos = (dc.getWidth() - width_at_pos) / 2;
-         if (screen_shape == System.SCREEN_SHAPE_SEMI_OCTAGON)
+         if ($.SCREEN_SHAPE == System.SCREEN_SHAPE_SEMI_OCTAGON)
            {
              x_pos = 5;
            }
          dc.drawText(x_pos, second_line_y, FONT, item.get(NearbyStopsDetailsDataProvider.DIRECTION), Gfx.TEXT_JUSTIFY_LEFT);
          dc.drawLine(0, local_y, dc.getWidth(), local_y);
+      }
+    }
+    else
+      {
+        DISPLAY_ELEMENTS = 2;
+        FONT = Gfx.FONT_SYSTEM_TINY;
+        var fontheight = Gfx.getFontHeight(FONT);
+        var bottom_height = dc.getHeight() * 0.06;
+        var element_height = (dc.getHeight() - clock_height - bottom_height) / DISPLAY_ELEMENTS;
+        for (var i = 0; i < DISPLAY_ELEMENTS; i++)
+          {
+            var local_y = clock_height + (i * element_height);
 
-         if (screen_shape == System.SCREEN_SHAPE_SEMI_OCTAGON)
-           {
-             width_at_pos = dc.getTextWidthInPixels(time, FONT);
-             //$.DEBUGGER.println(Lang.format("width at pos: $1$, width: $2$", [width_at_pos, dc.getWidth()]));
-             dc.drawText(dc.getWidth() - width_at_pos - 5, first_line_y, FONT, time, Gfx.TEXT_JUSTIFY_LEFT);
-           }
-         else 
-           {
-             dc.setColor(get_color_for_time(start_time, predicted_start_time), Gfx.COLOR_TRANSPARENT);
-             width_at_pos = $.WRITER.getWidthForLine(first_line_y, fontheight);
-             dc.drawText((dc.getWidth() - width_at_pos) / 2 + width_at_pos, first_line_y, FONT, time, Gfx.TEXT_JUSTIFY_RIGHT);
-           }
+            dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
+
+            var item = nearby_stops_details_data_provider.nearby_stops_details_array[current_item + i - 1];
+
+            var one_line_height = element_height / 2;
+            var first_line_y = local_y + (element_height * 0.05);
+            var second_line_y = local_y + (element_height * 0.3);
+
+            var width_at_pos = $.WRITER.getWidthForLine(first_line_y + 5, fontheight);
+            dc.setColor(linenum_color2, linenum_color);
+            var x_pos = (dc.getWidth() - width_at_pos) / 2;
+            if ($.SCREEN_SHAPE == System.SCREEN_SHAPE_SEMI_OCTAGON)
+              {
+                x_pos = 5;
+              }
+            dc.drawText(x_pos, first_line_y , FONT, item.get(NearbyStopsDetailsDataProvider.LINE_NUMBER), Gfx.TEXT_JUSTIFY_LEFT);
+
+            var start_time = item.get(NearbyStopsDetailsDataProvider.START_TIME);
+            //$.DEBUGGER.println(Lang.format("STARTTIME: $1$, download_done: $2$", [start_time, download_done]));
+            var predicted_start_time = item.get(NearbyStopsDetailsDataProvider.PREDICTED_START_TIME);
+            var center_time_x = dc.getWidth() / 2;
+            if ((i == 0) && $.SCREEN_SHAPE != System.SCREEN_SHAPE_SEMI_OCTAGON)
+              {
+                center_time_x = center_time_x - 10;
+              }
+            var time = draw_center_time(dc, center_time_x, first_line_y, FONT, start_time);
+
+            if (predicted_start_time == 0)
+              {
+                predicted_start_time = start_time;
+              }
+
+            time = get_pred_time(predicted_start_time);
+            var time_color = get_color_for_time(start_time, predicted_start_time);
+
+            draw_countdown_timer(dc, time, time_color, FONT, first_line_y);
+
+            var locx = dc.getWidth() * 0.05;
+            var locy = second_line_y;
+            var locwidth = dc.getWidth() * 0.95;
+            var locheight = dc.getHeight() * 0.3;
+            if (i == 1 && $.SCREEN_SHAPE == System.SCREEN_SHAPE_ROUND)
+              {
+                locx = dc.getWidth() * 0.1;
+                locy = dc.getHeight() * 0.65;
+                locwidth = dc.getWidth() * 0.70;                
+              }
+            var text_area = new Ui.TextArea({
+                :text=>item.get(NearbyStopsDetailsDataProvider.DIRECTION),
+                :color=>Gfx.COLOR_BLACK,
+                :font=>[Gfx.FONT_SYSTEM_LARGE, Gfx.FONT_SYSTEM_MEDIUM, Gfx.FONT_SYSTEM_SMALL, Gfx.FONT_SYSTEM_TINY],
+                :justification=>Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER,
+                :locX =>locx,
+                :locY=>locy,
+                :width=>locwidth,
+                :height=>locheight
+            });
+            text_area.draw(dc);
+          }
+        draw_arrow(dc, clock_height, bottom_height, element_height);
       }
   }
 
@@ -252,15 +387,15 @@ class NearbyStopsDetailsView extends Ui.View
   {
     if (start_time == predicted_start_time)
       {
-        return Gfx.COLOR_GREEN;
+        return Gfx.COLOR_DK_GREEN;
       }
     else if (start_time + 30 > predicted_start_time &&
              start_time - 30 < predicted_start_time)
       {
-        return Gfx.COLOR_BLUE;
+        return Gfx.COLOR_DK_BLUE;
       }
 
-    return Gfx.COLOR_RED;
+    return Gfx.COLOR_DK_RED;
   }
 
   private function get_pred_time(pred_start_time)
@@ -290,7 +425,7 @@ class NearbyStopsDetailsView extends Ui.View
     var hour = seconds / 3600;
     var minute = (seconds / 60) % 60;
     var second = seconds % 60;
-    if (screen_shape == System.SCREEN_SHAPE_SEMI_OCTAGON)
+    if (($.SCREEN_SHAPE == System.SCREEN_SHAPE_SEMI_OCTAGON) or $.NEW_LAYOUT)
       {
         return Lang.format("$1$$2$:$3$", [string, minute.format("%02d"), second.format("%02d")]);
       }
@@ -327,7 +462,13 @@ class NearbyStopsDetailsView extends Ui.View
 
   public function prev()
   {
-    if (current_item == 0)
+    var first_item = 0;
+    if ($.NEW_LAYOUT)
+      {
+        first_item = 1;
+      }
+
+    if (current_item == first_item)
     {
       return true;
     }

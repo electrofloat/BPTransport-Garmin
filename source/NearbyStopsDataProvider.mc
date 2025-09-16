@@ -41,6 +41,7 @@ class NearbyStopsDataProvider
     LINES,
     DISTANCE,
     COLOR,
+    COLOR2,
     RESOURCE
   }
 
@@ -252,47 +253,60 @@ class NearbyStopsDataProvider
               LINES => lines,
               DISTANCE => distance,
               COLOR => color[0],
-              RESOURCE => color[1]
+              COLOR2 => color[1],
+              RESOURCE => color[2]
             });
   }
 
   private function get_color(color_text)
   {
     var tram_color = Gfx.COLOR_YELLOW;
+    var tram_color2 = Gfx.COLOR_BLACK;
     var bus_color = Gfx.COLOR_BLUE;
+    var bus_color2 = Gfx.COLOR_BLACK;
     var nightbus_color = Gfx.COLOR_DK_BLUE;
+    var nightbus_color2 = Gfx.COLOR_WHITE;
     var trolleybus_color = Gfx.COLOR_RED;
+    var trolleybus_color2 = Gfx.COLOR_WHITE;
+    var m_color = Gfx.COLOR_DK_GRAY;
+    var m_color2 = Gfx.COLOR_WHITE;
 
     if (Toybox.System has :SCREEN_SHAPE_SEMI_OCTAGON && screen_shape == System.SCREEN_SHAPE_SEMI_OCTAGON)
       {
         tram_color = Gfx.COLOR_BLACK;
+        tram_color2 = Gfx.COLOR_WHITE;
         bus_color = Gfx.COLOR_BLACK;
+        bus_color2 = Gfx.COLOR_WHITE;
         nightbus_color = Gfx.COLOR_BLACK;
+        nightbus_color2 = Gfx.COLOR_WHITE;
         trolleybus_color = Gfx.COLOR_BLACK;
+        trolleybus_color2 = Gfx.COLOR_WHITE;
+        m_color = Gfx.COLOR_BLACK;
+        m_color2 = Gfx.COLOR_WHITE;
       }
 
     if (color_text.equals("TRAM") || color_text.equals("tram"))
       {
-        return [tram_color, Rez.Drawables.tram];
+        return [tram_color, tram_color2, Rez.Drawables.tram];
       }
     else if (color_text.equals("BUS") || color_text.equals("bus"))
       {
-        return [bus_color, Rez.Drawables.bus];
+        return [bus_color, bus_color2, Rez.Drawables.bus];
       }
     else if (color_text.equals("NIGHTBUS") || color_text.equals("night-bus"))
       {
-        return [nightbus_color, Rez.Drawables.nightbus];
+        return [nightbus_color, nightbus_color2, Rez.Drawables.nightbus];
       }
     else if (color_text.equals("TROLLEYBUS") || color_text.equals("trolleybus"))
       {
-        return [trolleybus_color, Rez.Drawables.trolley];
+        return [trolleybus_color, trolleybus_color2, Rez.Drawables.trolley];
       }
     else if (color_text.equals("M1") || color_text.equals("M2") || color_text.equals("M3") || color_text.equals("M4") || color_text.equals("subway"))
       {
-        return [Gfx.COLOR_BLACK, Rez.Drawables.metro];
+        return [m_color, m_color2, Rez.Drawables.metro];
       }
 
-    return [Gfx.COLOR_BLACK, null];
+    return [Gfx.COLOR_BLACK, Gfx.COLOR_WHITE, null];
   }
 
   private function sort_array()

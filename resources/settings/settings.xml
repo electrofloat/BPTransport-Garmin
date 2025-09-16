@@ -2,4 +2,7 @@
   <setting propertyKey="@Properties.radius" title="@Strings.radius">
   	<settingConfig type="numeric" min="0" max="600"></settingConfig>
   </setting>
+  <setting propertyKey="@Properties.newlayout" title="@Strings.newlayout">
+  	<settingConfig type="boolean"></settingConfig>
+  </setting>
 </settings>

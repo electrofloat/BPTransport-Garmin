@@ -24,7 +24,7 @@ class NearbyStopsView extends Ui.View
 {
   private var current_item;
 
-  private const FONT = Gfx.FONT_SYSTEM_XTINY;
+  private var FONT = Gfx.FONT_SYSTEM_XTINY;
 
   private const LOWER_LEFT_LAT = 47.1523107;
   private const LOWER_LEFT_LON = 18.8460594;
@@ -42,7 +42,7 @@ class NearbyStopsView extends Ui.View
   private var first_download_done = false;
   private var download_in_progress = false;
   private var nearby_stops_sent = false;
-
+  
   public function initialize()
   {
     $.DEBUGGER.println("NearbyStopsView::initialize");
@@ -132,7 +132,50 @@ class NearbyStopsView extends Ui.View
   {
     $.DEBUGGER.println("******get_language_reply invoked");
   }
-  
+
+  private function draw_arrows(dc, top_space, fontheight)
+  {
+    /*if (top_space + 12 < fontheight)
+    {
+      FONT = Gfx.FONT_XTINY;
+    }*/
+    var front_color = Gfx.COLOR_BLACK;
+    if ($.SCREEN_SHAPE == System.SCREEN_SHAPE_SEMI_OCTAGON)
+      {
+        front_color = Gfx.COLOR_WHITE;
+      }
+
+
+    if (current_item < nearby_stops_data_provider.nearby_stops_array.size() - 1)
+      {
+        dc.setColor(Gfx.COLOR_DK_GREEN, Gfx.COLOR_TRANSPARENT);
+        dc.fillRectangle(0, dc.getHeight() - top_space, dc.getWidth(), dc.getHeight());
+        dc.setColor(front_color, Gfx.COLOR_TRANSPARENT);
+        dc.drawText((dc.getWidth() / 2) , dc.getHeight() - top_space - 8 , FONT, "->", Gfx.TEXT_JUSTIFY_CENTER);
+      }
+    else
+      {
+        dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+        dc.fillRectangle(0, dc.getHeight() - top_space, dc.getWidth(), dc.getHeight());
+      }
+    dc.setColor(front_color, Gfx.COLOR_TRANSPARENT);
+    dc.drawLine(0, dc.getHeight() - top_space, dc.getWidth(), dc.getHeight() - top_space);
+    if (current_item > 0)
+      {
+        dc.setColor(Gfx.COLOR_DK_GREEN, Gfx.COLOR_TRANSPARENT);
+        dc.fillRectangle(0, 0, dc.getWidth(), top_space);
+        dc.setColor(front_color, Gfx.COLOR_TRANSPARENT);
+        dc.drawText((dc.getWidth() / 2), - 8, FONT, "<-", Gfx.TEXT_JUSTIFY_CENTER);
+      }
+    else
+      {
+        dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+        dc.fillRectangle(0, 0, dc.getWidth(), top_space);
+      }
+    dc.setColor(front_color, Gfx.COLOR_TRANSPARENT);
+    dc.drawLine(0, top_space, dc.getWidth(), top_space);
+  }
+
   public function onUpdate(dc)
   {
     //$.DEBUGGER.println(Lang.format("WAIT FOR DATA: $1$, HAS_PHONE_APP: $2$", [$.WAIT_FOR_DATA, $.HAS_PHONE_APP]));
@@ -190,70 +233,164 @@ class NearbyStopsView extends Ui.View
 
     var x = 5;
     var y = 0;
-    var fontheight = Gfx.getFontHeight(FONT);
-    var element_height = dc.getHeight() / 3;
-
-    for (var i = 0; i < 3; i++)
+    if (!$.NEW_LAYOUT)
       {
-        //$.DEBUGGER.println(i);
-        var local_y = y + (i * element_height);
-        if (i == 0 && current_item == 0)
-          {
-            dc.fillRectangle(0, 0, dc.getWidth(), element_height);
-            continue;
-          }
-        if (current_item + i - 1 > nearby_stops_data_provider.nearby_stops_array.size() - 1)
-          {
-            dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
-            dc.fillRectangle(0, local_y, dc.getWidth(), dc.getHeight());
-            continue;
-          }
-        var text_color;
-        if (i == 1)
-          {
-            dc.setColor( Gfx.COLOR_DK_GRAY, Gfx.COLOR_BLACK );
-            dc.fillRectangle(0, local_y, dc.getWidth(), element_height);
-            text_color = Gfx.COLOR_WHITE;
-          }
-        else
-          {
-            text_color = Gfx.COLOR_BLACK;
-          }
+        var fontheight = Gfx.getFontHeight(FONT);
+        var element_height = dc.getHeight() / 3;
 
-        var item = nearby_stops_data_provider.nearby_stops_array[current_item + i - 1];
+        for (var i = 0; i < 3; i++)
+          {
+            //$.DEBUGGER.println(i);
+            var local_y = y + (i * element_height);
+            if (i == 0 && current_item == 0)
+              {
+                dc.fillRectangle(0, 0, dc.getWidth(), element_height);
+                continue;
+              }
+            if (current_item + i - 1 > nearby_stops_data_provider.nearby_stops_array.size() - 1)
+              {
+                dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
+                dc.fillRectangle(0, local_y, dc.getWidth(), dc.getHeight());
+                continue;
+              }
+            var text_color;
+            if (i == 1)
+              {
+                dc.setColor( Gfx.COLOR_DK_GRAY, Gfx.COLOR_BLACK );
+                dc.fillRectangle(0, local_y, dc.getWidth(), element_height);
+                text_color = Gfx.COLOR_WHITE;
+              }
+            else
+              {
+                text_color = Gfx.COLOR_BLACK;
+              }
+
+            var item = nearby_stops_data_provider.nearby_stops_array[current_item + i - 1];
+
+            var one_line_height = element_height / 3;
+            var first_line_y = local_y + ((one_line_height - fontheight) / 2);
+            var second_line_y = first_line_y + one_line_height;
+            var third_line_y = second_line_y + one_line_height;
+
+            dc.setColor(text_color, Gfx.COLOR_TRANSPARENT);
+            if (item.get(NearbyStopsDataProvider.RESOURCE) != null)
+              {
+                var image = Ui.loadResource(item.get(NearbyStopsDataProvider.RESOURCE));
+                dc.drawBitmap(x - 1, first_line_y, image);
+              }
+            dc.drawText(x + 35, first_line_y, FONT, item.get(NearbyStopsDataProvider.STOP), Gfx.TEXT_JUSTIFY_LEFT);
+            dc.drawText(x, second_line_y, FONT, item.get(NearbyStopsDataProvider.DIRECTION), Gfx.TEXT_JUSTIFY_LEFT);
+
+            var lines_color = item.get(NearbyStopsDataProvider.COLOR);
+            if (lines_color == Gfx.COLOR_BLACK)
+              {
+                lines_color = text_color;
+              }
+            dc.setColor(lines_color, Gfx.COLOR_TRANSPARENT);
+            var distance = Lang.format("$1$m", [Math.round(item.get(NearbyStopsDataProvider.DISTANCE)).format("%d")]);
+            var distance_width = dc.getTextWidthInPixels(distance, FONT);
+            var lines_text = Gfx.fitTextToArea(item.get(NearbyStopsDataProvider.LINES), FONT, dc.getWidth() - distance_width - x, fontheight, false);
+
+            if (lines_text == null)
+              {
+                lines_text = Gfx.fitTextToArea(item.get(NearbyStopsDataProvider.LINES), FONT, dc.getWidth() - distance_width - x, fontheight, true);
+              }
+            dc.drawText(x, third_line_y , FONT, lines_text, Gfx.TEXT_JUSTIFY_LEFT);
+            dc.setColor(text_color, Gfx.COLOR_TRANSPARENT );
+
+            dc.drawText(x + dc.getWidth() - 10, third_line_y, FONT, distance, Gfx.TEXT_JUSTIFY_RIGHT);
+
+            //dc.drawLine(0, local_y + 3 * fontheight + 10, dc.getWidth(), local_y + 3 * fontheight + 10);
+        }
+    }
+    else
+      {
+        FONT = Gfx.FONT_SYSTEM_TINY;
+        var fontheight = Gfx.getFontHeight(FONT);
+       
+        var top_space = dc.getHeight() * 0.06;
+        var element_height = dc.getHeight() - (2 * top_space);
+
+        var local_y = y + (top_space);
+        var text_color = Gfx.COLOR_WHITE;
+    
+        dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_BLACK );
+        dc.fillRectangle(0, local_y, dc.getWidth(), element_height);
+   
+        var item = nearby_stops_data_provider.nearby_stops_array[current_item];
 
         var one_line_height = element_height / 3;
-        var first_line_y = local_y + ((one_line_height - fontheight) / 2);
+        var first_line_y = local_y;
         var second_line_y = first_line_y + one_line_height;
         var third_line_y = second_line_y + one_line_height;
 
-        dc.setColor(text_color, Gfx.COLOR_TRANSPARENT);
-        if (item.get(NearbyStopsDataProvider.RESOURCE) != null)
-          {
-            var image = Ui.loadResource(item.get(NearbyStopsDataProvider.RESOURCE));
-            dc.drawBitmap(x - 1, first_line_y, image);
-          }
-        dc.drawText(x + 35, first_line_y, FONT, item.get(NearbyStopsDataProvider.STOP), Gfx.TEXT_JUSTIFY_LEFT);
-        dc.drawText(x, second_line_y, FONT, item.get(NearbyStopsDataProvider.DIRECTION), Gfx.TEXT_JUSTIFY_LEFT);
-        var lines_color = item.get(NearbyStopsDataProvider.COLOR);
-        if (lines_color == Gfx.COLOR_BLACK)
-          {
-            lines_color = text_color;
-          }
-        dc.setColor(lines_color, Gfx.COLOR_TRANSPARENT);
+        dc.setColor(item.get(NearbyStopsDataProvider.COLOR), Gfx.COLOR_TRANSPARENT);
+        dc.fillRectangle(0,first_line_y,dc.getWidth(), one_line_height);
+
+        var text_area = new Ui.TextArea({
+            :text=>item.get(NearbyStopsDataProvider.STOP),
+            :color=>item.get(NearbyStopsDataProvider.COLOR2),
+            :font=>[Gfx.FONT_SYSTEM_LARGE, Gfx.FONT_SYSTEM_MEDIUM, Gfx.FONT_SYSTEM_SMALL, Gfx.FONT_SYSTEM_TINY],
+            :justification=>Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER,
+            :locX =>dc.getWidth() * 0.1,
+            :locY=>first_line_y,
+            :width=>dc.getWidth() * 0.80,
+            :height=>one_line_height
+        });
+        text_area.draw(dc);
+        dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+        dc.drawLine(0, second_line_y, dc.getWidth(), second_line_y);
+             
+        var w = $.WRITER.getWidthForLine(second_line_y, fontheight);
+        x = (dc.getWidth() - w) / 2;
+        text_area = new Ui.TextArea({
+            :text=>item.get(NearbyStopsDataProvider.DIRECTION),
+            :color=>text_color,
+            :font=>[Gfx.FONT_SYSTEM_LARGE, Gfx.FONT_SYSTEM_MEDIUM, Gfx.FONT_SYSTEM_SMALL, Gfx.FONT_SYSTEM_TINY],
+            :justification=>Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER,
+            :locX =>x,
+            :locY=>second_line_y,
+            :width=>dc.getWidth() * 0.95,
+            :height=>one_line_height
+        });
+        text_area.draw(dc);
+
+        // DRAW 3rd ITEM
+        dc.setColor(item.get(NearbyStopsDataProvider.COLOR), Gfx.COLOR_TRANSPARENT);
+        dc.fillRectangle(0,third_line_y,dc.getWidth() * 0.70, one_line_height);
+
+        text_area = new Ui.TextArea({
+            :text=>item.get(NearbyStopsDataProvider.LINES),
+            :color=>item.get(NearbyStopsDataProvider.COLOR2),
+            :font=>[Gfx.FONT_SYSTEM_LARGE, Gfx.FONT_SYSTEM_MEDIUM, Gfx.FONT_SYSTEM_SMALL, Gfx.FONT_SYSTEM_TINY],
+            :justification=>Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER,
+            :locX =>dc.getWidth() * 0.10,
+            :locY=>dc.getHeight() * 0.63,
+            :width=>(dc.getWidth() * 0.60),
+            :height=>one_line_height
+        });
+        text_area.draw(dc);        
+        
+        dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+        dc.drawLine(0, third_line_y , dc.getWidth(), third_line_y );
+        dc.fillRectangle(dc.getWidth() * 0.70,third_line_y,dc.getWidth(), one_line_height);
+
+        dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_TRANSPARENT);
         var distance = Lang.format("$1$m", [Math.round(item.get(NearbyStopsDataProvider.DISTANCE)).format("%d")]);
-        var distance_width = dc.getTextWidthInPixels(distance, FONT);
-        var lines_text = Gfx.fitTextToArea(item.get(NearbyStopsDataProvider.LINES), FONT, dc.getWidth() - distance_width - x, fontheight, false);
+        w = $.WRITER.getWidthForLine(third_line_y, fontheight);
+        text_area = new Ui.TextArea({
+            :text=>distance,
+            :color=>Gfx.COLOR_BLACK,
+            :font=>[Gfx.FONT_SYSTEM_LARGE, Gfx.FONT_SYSTEM_MEDIUM, Gfx.FONT_SYSTEM_SMALL, Gfx.FONT_SYSTEM_TINY],
+            :justification=>Gfx.TEXT_JUSTIFY_LEFT,
+            :locX =>(dc.getWidth() * 0.70) + 5,
+            :locY=>third_line_y,
+            :width=>dc.getWidth() * 0.22,
+            :height=>one_line_height
+        });
+        text_area.draw(dc);
 
-        if (lines_text == null)
-          {
-            lines_text = Gfx.fitTextToArea(item.get(NearbyStopsDataProvider.LINES), FONT, dc.getWidth() - distance_width - x, fontheight, true);
-          }
-        dc.drawText(x, third_line_y , FONT, lines_text, Gfx.TEXT_JUSTIFY_LEFT);
-        dc.setColor(text_color, Gfx.COLOR_TRANSPARENT );
-
-        dc.drawText(x + dc.getWidth() - 10, third_line_y, FONT, distance, Gfx.TEXT_JUSTIFY_RIGHT);
-        //dc.drawLine(0, local_y + 3 * fontheight + 10, dc.getWidth(), local_y + 3 * fontheight + 10);
+        draw_arrows(dc, top_space, fontheight);
       }
 }
 
@@ -381,7 +518,7 @@ class NearbyStopsView extends Ui.View
         return false;
       }
     var nearby_stops_details_view = new NearbyStopsDetailsView(nearby_stops_data_provider.nearby_stops_array[current_item].get(NearbyStopsDataProvider.STOP_ID),
-                                                             nearby_stops_data_provider.nearby_stops_array[current_item].get(NearbyStopsDataProvider.COLOR), current_item);
+                                                             nearby_stops_data_provider.nearby_stops_array[current_item].get(NearbyStopsDataProvider.COLOR), nearby_stops_data_provider.nearby_stops_array[current_item].get(NearbyStopsDataProvider.COLOR2), current_item);
 
     nearby_stops_data_provider.clear_callback();
     Ui.pushView(nearby_stops_details_view, new BPTInputDelegate(nearby_stops_details_view), Ui.SLIDE_LEFT);

@@ -1,3 +1,4 @@
 <properties>
   <property id="radius" type="number">50</property>
+  <property id="newlayout" type="boolean">false</property>
 </properties>
