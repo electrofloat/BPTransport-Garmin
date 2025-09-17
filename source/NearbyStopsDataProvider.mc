@@ -126,6 +126,15 @@ class NearbyStopsDataProvider
         nearby_stops_array = [];
         for (var i = 0; i < list.size(); i++)
           {
+            var location_type = list[i].get("locationType");
+            if (location_type == 1)
+              {
+                var location_subtype = list[i].get("locationSubType");
+                if (location_subtype.equals("stop-area"))
+                  {
+                    continue;
+                  }
+              }
             stop = list[i].get("name");
             if (stop == null)
               {
