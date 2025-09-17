@@ -159,14 +159,8 @@ class NearbyStopsDetailsView extends Ui.View
       }
 
     var fontheight = dc.getFontHeight(font);
-    if ($.NEW_LAYOUT)
-      {
-        dc.setColor(Gfx.COLOR_WHITE, color);
-      }
-    else
-      {
-        dc.setColor(color, Gfx.COLOR_TRANSPARENT);
-      }
+
+    dc.setColor(color, Gfx.COLOR_TRANSPARENT);
     var width_at_pos = $.WRITER.getWidthForLine(y + 5, fontheight);
     dc.drawText((dc.getWidth() - width_at_pos) / 2 + width_at_pos, y, font, time, Gfx.TEXT_JUSTIFY_RIGHT);
   }
@@ -314,50 +308,105 @@ class NearbyStopsDetailsView extends Ui.View
       {
         DISPLAY_ELEMENTS = 2;
         FONT = Gfx.FONT_SYSTEM_TINY;
-        var fontheight = Gfx.getFontHeight(FONT);
+
         var bottom_height = dc.getHeight() * 0.06;
         var element_height = (dc.getHeight() - clock_height - bottom_height) / DISPLAY_ELEMENTS;
         for (var i = 0; i < DISPLAY_ELEMENTS; i++)
           {
             var local_y = clock_height + (i * element_height);
 
-            dc.setColor( Gfx.COLOR_BLACK, Gfx.COLOR_WHITE );
-
             var item = nearby_stops_details_data_provider.nearby_stops_details_array[current_item + i - 1];
 
             //var one_line_height = element_height / 2;
-            var first_line_y = local_y + (element_height * 0.05);
+            var first_line_y = local_y + (element_height * 0.03);
             var second_line_y = local_y + (element_height * 0.3);
 
-            var width_at_pos = $.WRITER.getWidthForLine(first_line_y + 5, fontheight);
-            dc.setColor(linenum_color2, linenum_color);
-            var x_pos = (dc.getWidth() - width_at_pos) / 2;
-            if ($.SCREEN_SHAPE == System.SCREEN_SHAPE_SEMI_OCTAGON)
+            // 1 - LINE NUMBER
+            var x = 5;
+            if (i == 0 && $.SCREEN_SHAPE == System.SCREEN_SHAPE_ROUND)
               {
-                x_pos = 5;
+                x = dc.getWidth() * 0.12;
               }
-            dc.drawText(x_pos, first_line_y , FONT, item.get(NearbyStopsDetailsDataProvider.LINE_NUMBER), Gfx.TEXT_JUSTIFY_LEFT);
+            if (i == 1 && $.SCREEN_SHAPE == System.SCREEN_SHAPE_ROUND)
+              {
+                x = dc.getWidth() * 0.05;
+              }
+            var text_area = new Ui.TextArea({
+                :text=>item.get(NearbyStopsDetailsDataProvider.LINE_NUMBER),
+                :color=>linenum_color2,
+                :backgroundColor=>linenum_color,
+                :font=>[Gfx.FONT_SYSTEM_LARGE, Gfx.FONT_SYSTEM_MEDIUM, Gfx.FONT_SYSTEM_SMALL, Gfx.FONT_SYSTEM_TINY],
+                :justification=>Gfx.TEXT_JUSTIFY_LEFT,
+                :locX =>x,
+                :locY=>first_line_y,
+                :width=>dc.getWidth() * 0.27,
+                :height=>dc.getHeight() * 0.15
+            });
+            text_area.draw(dc);
 
+            // 1 - CENTER TIME
             var start_time = item.get(NearbyStopsDetailsDataProvider.START_TIME);
             //$.DEBUGGER.println(Lang.format("STARTTIME: $1$, download_done: $2$", [start_time, download_done]));
             var predicted_start_time = item.get(NearbyStopsDetailsDataProvider.PREDICTED_START_TIME);
-            var center_time_x = dc.getWidth() / 2;
-            if ((i == 0) && $.SCREEN_SHAPE != System.SCREEN_SHAPE_SEMI_OCTAGON)
+            var time_moment = new Time.Moment(start_time.toNumber());
+            var time = Gregorian.info(time_moment, Time.FORMAT_SHORT);
+
+            x = dc.getWidth() * 0.4;
+            y = first_line_y + 3;
+            var width = dc.getWidth() * 0.25;
+            if (i == 1)
               {
-                center_time_x = center_time_x - 10;
+                width = dc.getWidth() * 0.3;
+                y = first_line_y;
               }
-            var time = draw_center_time(dc, center_time_x, first_line_y, FONT, start_time);
+            if (i == 0 && $.SCREEN_SHAPE == System.SCREEN_SHAPE_ROUND)
+              {
+                x = dc.getWidth() * 0.34;
+              }
+            if (i == 1 && $.SCREEN_SHAPE == System.SCREEN_SHAPE_ROUND)
+              {
+                x = dc.getWidth() * 0.35;
+              }
+            text_area = new Ui.TextArea({
+                :text=>Lang.format("$1$:$2$", [time.hour.format("%02d"), time.min.format("%02d")]),
+                :color=>Gfx.COLOR_BLACK,
+                :font=>[Gfx.FONT_SYSTEM_LARGE, Gfx.FONT_SYSTEM_MEDIUM, Gfx.FONT_SYSTEM_SMALL, Gfx.FONT_SYSTEM_TINY],
+                :justification=>Gfx.TEXT_JUSTIFY_LEFT,
+                :locX =>x,
+                :locY=>y,
+                :width=>width,
+                :height=>dc.getHeight() * 0.15
+            });
+            text_area.draw(dc);
 
             if (predicted_start_time == 0)
               {
                 predicted_start_time = start_time;
               }
 
+           // 1 - COUNTDOWN TIMER
             time = get_pred_time(predicted_start_time);
             var time_color = get_color_for_time(start_time, predicted_start_time);
 
-            draw_countdown_timer(dc, time, time_color, FONT, first_line_y);
+            x = dc.getWidth() * 0.55;
+            if (i == 1 || $.SCREEN_SHAPE != System.SCREEN_SHAPE_ROUND)
+              {
+                x = dc.getWidth() * 0.63;
+              }
+            text_area = new Ui.TextArea({
+                :text=>time,
+                :color=>Gfx.COLOR_WHITE,
+                :backgroundColor=>time_color,
+                :font=>[Gfx.FONT_SYSTEM_LARGE, Gfx.FONT_SYSTEM_MEDIUM, Gfx.FONT_SYSTEM_SMALL, Gfx.FONT_SYSTEM_TINY],
+                :justification=>Gfx.TEXT_JUSTIFY_RIGHT,
+                :locX =>x,
+                :locY=>first_line_y,
+                :width=>dc.getWidth() * 0.33,
+                :height=>dc.getHeight() * 0.15
+            });
+            text_area.draw(dc);
 
+            // 2 - DIRECTION
             var locx = dc.getWidth() * 0.05;
             var locy = second_line_y;
             var locwidth = dc.getWidth() * 0.95;
@@ -368,7 +417,7 @@ class NearbyStopsDetailsView extends Ui.View
                 locy = dc.getHeight() * 0.65;
                 locwidth = dc.getWidth() * 0.70;                
               }
-            var text_area = new Ui.TextArea({
+            text_area = new Ui.TextArea({
                 :text=>item.get(NearbyStopsDetailsDataProvider.DIRECTION),
                 :color=>Gfx.COLOR_BLACK,
                 :font=>[Gfx.FONT_SYSTEM_LARGE, Gfx.FONT_SYSTEM_MEDIUM, Gfx.FONT_SYSTEM_SMALL, Gfx.FONT_SYSTEM_TINY],
