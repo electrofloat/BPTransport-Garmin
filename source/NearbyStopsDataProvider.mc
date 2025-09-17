@@ -280,6 +280,8 @@ class NearbyStopsDataProvider
     var trolleybus_color2 = Gfx.COLOR_WHITE;
     var m_color = Gfx.COLOR_DK_GRAY;
     var m_color2 = Gfx.COLOR_WHITE;
+    var sr_color = Gfx.COLOR_DK_GREEN;
+    var sr_color2 = Gfx.COLOR_WHITE;
 
     if (Toybox.System has :SCREEN_SHAPE_SEMI_OCTAGON && screen_shape == System.SCREEN_SHAPE_SEMI_OCTAGON)
       {
@@ -293,6 +295,8 @@ class NearbyStopsDataProvider
         trolleybus_color2 = Gfx.COLOR_WHITE;
         m_color = Gfx.COLOR_BLACK;
         m_color2 = Gfx.COLOR_WHITE;
+        sr_color = Gfx.COLOR_BLACK;
+        sr_color2 = Gfx.COLOR_WHITE;
       }
 
     if (color_text.equals("TRAM") || color_text.equals("tram"))
@@ -314,6 +318,10 @@ class NearbyStopsDataProvider
     else if (color_text.equals("M1") || color_text.equals("M2") || color_text.equals("M3") || color_text.equals("M4") || color_text.equals("subway"))
       {
         return [m_color, m_color2, Rez.Drawables.metro];
+      }
+    else if (color_text.equals("suburban-railway"))
+      {
+        return [sr_color, sr_color2, null];
       }
 
     return [Gfx.COLOR_BLACK, Gfx.COLOR_WHITE, null];
