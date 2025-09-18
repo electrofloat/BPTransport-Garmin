@@ -313,6 +313,10 @@ class NearbyStopsDetailsView extends Ui.View
         var element_height = (dc.getHeight() - clock_height - bottom_height) / DISPLAY_ELEMENTS;
         for (var i = 0; i < DISPLAY_ELEMENTS; i++)
           {
+            if (current_item + i > nearby_stops_details_data_provider.nearby_stops_details_array.size())
+              {
+                 continue;
+              }
             var local_y = clock_height + (i * element_height);
 
             var item = nearby_stops_details_data_provider.nearby_stops_details_array[current_item + i - 1];
